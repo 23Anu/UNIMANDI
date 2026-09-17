@@ -1,0 +1,175 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+  :root {
+    --bg-canvas: #F8F9FA;
+    --text-charcoal: #121417;
+    --accent-orange: #FF5A1F;
+    --success-emerald: #10B981;
+    --warning-red: #EF4444;
+    --border-gray: #E2E8F0;
+  }
+
+  body {
+    background-color: #F8F9FA;
+    color: #121417;
+    font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+    text-rendering: optimizeLegibility;
+    -webkit-font-smoothing: antialiased;
+    letter-spacing: -0.01em;
+  }
+
+  h1, h2, h3, h4, .font-heading, .font-serif {
+    font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
+    letter-spacing: -0.025em;
+  }
+}
+
+/* Custom Swiss minimalist scrollbars */
+::-webkit-scrollbar {
+  width: 5px;
+  height: 5px;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::-webkit-scrollbar-thumb {
+  background: #CBD5E1;
+  border-radius: 9999px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #94A3B8;
+}
+
+/* Keyframes */
+@keyframes bubbleIn {
+  0% { opacity: 0; transform: translateY(12px) scale(0.95); }
+  100% { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@keyframes scaleIn {
+  0% { opacity: 0; transform: scale(0.92); }
+  100% { opacity: 1; transform: scale(1); }
+}
+
+@keyframes revealUp {
+  0% { opacity: 0; transform: translateY(14px); }
+  100% { opacity: 1; transform: translateY(0); }
+}
+
+@keyframes scannerLaser {
+  0% { top: 0%; opacity: 0.8; }
+  50% { top: 92%; opacity: 1; }
+  100% { top: 0%; opacity: 0.8; }
+}
+
+@keyframes heartPop {
+  0% { transform: scale(1); }
+  40% { transform: scale(1.35) rotate(-12deg); }
+  70% { transform: scale(0.9) rotate(8deg); }
+  100% { transform: scale(1) rotate(0deg); }
+}
+
+@keyframes floatParticle {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(-10px) rotate(3deg); }
+}
+
+@keyframes floatParticleReverse {
+  0%, 100% { transform: translateY(0px) rotate(0deg); }
+  50% { transform: translateY(10px) rotate(-3deg); }
+}
+
+@keyframes pulseGlow {
+  0%, 100% { transform: scale(1); opacity: 0.8; }
+  50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 12px rgba(255, 90, 31, 0.45)); }
+}
+
+@keyframes shineSweep {
+  0% { transform: translateX(-120%) skewX(-20deg); }
+  100% { transform: translateX(220%) skewX(-20deg); }
+}
+
+/* Status Badges */
+.badge-available {
+  @apply bg-emerald-50 text-emerald-700 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-semibold text-xs flex items-center gap-1.5 transition-all duration-200 hover:bg-emerald-100;
+}
+.badge-reserved {
+  @apply bg-amber-50 text-amber-700 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-semibold text-xs flex items-center gap-1.5 transition-all duration-200 hover:bg-amber-100;
+}
+.badge-sold {
+  @apply bg-slate-100 text-slate-700 border border-slate-300 px-2.5 py-0.5 rounded-full font-semibold text-xs flex items-center gap-1.5;
+}
+
+/* Swiss High-Contrast Action Buttons with Micro-Haptics */
+.btn-primary {
+  @apply bg-[#FF5A1F] hover:bg-[#E04812] text-white font-bold px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-center justify-center gap-2 tracking-tight;
+}
+.btn-secondary {
+  @apply bg-white hover:bg-slate-100 text-[#121417] font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 border border-slate-200 shadow-sm hover:shadow hover:-translate-y-0.5 flex items-center justify-center gap-2;
+}
+.btn-outline {
+  @apply border border-slate-300 hover:border-[#121417] hover:bg-white text-[#121417] font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
+}
+
+/* Card layout with interactive lift & smooth photo zoom */
+.listing-card {
+  @apply bg-white rounded-2xl border border-slate-200/90 overflow-hidden shadow-card hover:shadow-card-hover hover:border-[#FF5A1F]/40 transition-all duration-300 hover:-translate-y-2 flex flex-col;
+}
+
+/* Message Bubble Animation & Custom Gradients */
+.chat-bubble-me {
+  background-color: #121417;
+  color: #ffffff;
+  border-radius: 1rem;
+  border-bottom-right-radius: 0.125rem;
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  animation: bubbleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.2s ease;
+}
+
+.chat-bubble-peer {
+  background-color: #ffffff;
+  color: #121417;
+  border-radius: 1rem;
+  border-bottom-left-radius: 0.125rem;
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  box-shadow: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  animation: bubbleIn 0.22s cubic-bezier(0.16, 1, 0.3, 1) forwards;
+  transition: all 0.2s ease;
+}
+
+.glow-orange {
+  box-shadow: 0 0 25px -4px rgba(255, 90, 31, 0.45);
+}
+
+.glow-emerald {
+  box-shadow: 0 0 25px -4px rgba(16, 185, 129, 0.45);
+}
+
+.heart-pop {
+  animation: heartPop 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275) forwards;
+}
+
+.laser-scanner-line {
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 3px;
+  background: linear-gradient(90deg, transparent, #FF5A1F, #10B981, #FF5A1F, transparent);
+  box-shadow: 0 0 12px 2px rgba(255, 90, 31, 0.8);
+  animation: scannerLaser 2.2s ease-in-out infinite;
+}
+
+.hologram-border {
+  background: linear-gradient(135deg, #FF5A1F 0%, #10B981 50%, #6366F1 100%);
+  padding: 2px;
+  border-radius: 1.5rem;
+}
+
+
+
+
+

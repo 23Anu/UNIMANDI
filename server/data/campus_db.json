@@ -1,0 +1,763 @@
+{
+  "users": [
+    {
+      "id": "user_1789302530250",
+      "name": "Anuj",
+      "email": "anujpatil.work@outlook.com",
+      "phone": "",
+      "college": "National Institute of Technology",
+      "branch": "Computer Engineering",
+      "year": "2nd Year",
+      "semester": "4th Semester",
+      "rollNo": "2024CS995",
+      "addressType": "Campus Hostel / Dorm",
+      "roomNo": "Room 204",
+      "buildingName": "Hostel Block 3",
+      "streetArea": "North Campus",
+      "landmark": "Near Central Mess",
+      "city": "Pune",
+      "state": "Maharashtra",
+      "pincode": "411038",
+      "pickupLocation": "Central Library / Canteen",
+      "fullAddress": "Room 204, Hostel Block 3, North Campus, Near Near Central Mess, Pune, Maharashtra - 411038",
+      "hostel": "Hostel Block 3",
+      "isVerified": false,
+      "isEmailVerified": false,
+      "isPhoneVerified": false,
+      "isAddressVerified": true,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "trustScore": 5,
+      "dealsCount": 0,
+      "isProfileComplete": true,
+      "createdAt": "2026-09-13T12:28:50.250Z",
+      "bio": "Student at NIT. Looking to rent & sell academic gear.",
+      "updatedAt": "2026-09-13T12:28:57.573Z"
+    },
+    {
+      "id": "user_1",
+      "name": "Aarav Sharma",
+      "email": "aarav.s@campus.edu",
+      "phone": "+91 9876543210",
+      "college": "National Institute of Technology",
+      "branch": "Computer Engineering",
+      "year": "4th Year",
+      "semester": "7th Semester",
+      "rollNo": "2021CS042",
+      "addressType": "Campus Hostel / Dorm",
+      "roomNo": "Room 412, 4th Floor",
+      "buildingName": "Hostel Block 4 (Senior Boys)",
+      "streetArea": "South Campus Lane, Near Central Mess",
+      "landmark": "Opposite Volleyball Court",
+      "city": "Pune",
+      "state": "Maharashtra",
+      "pincode": "411038",
+      "pickupLocation": "Hostel Block 4 / Library",
+      "fullAddress": "Room 412, Hostel Block 4, South Campus Lane, Pune, Maharashtra - 411038",
+      "hostel": "Hostel Block 4 (Senior Boys)",
+      "isVerified": true,
+      "isEmailVerified": true,
+      "isPhoneVerified": true,
+      "isAddressVerified": true,
+      "avatar": "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80",
+      "trustScore": 4.9,
+      "dealsCount": 18,
+      "isProfileComplete": true,
+      "createdAt": "2026-01-15T10:00:00Z"
+    },
+    {
+      "id": "user_2",
+      "name": "Priya Patel",
+      "email": "priya.p@campus.edu",
+      "phone": "+91 9811223344",
+      "college": "National Institute of Technology",
+      "branch": "Electronics & Communication",
+      "year": "3rd Year",
+      "semester": "5th Semester",
+      "rollNo": "2022EC108",
+      "addressType": "Off-Campus PG / Shared Room",
+      "roomNo": "Flat 203, 2nd Floor",
+      "buildingName": "Sai Blossom Girls PG",
+      "streetArea": "Green Park Society, Gate 2 Road",
+      "landmark": "Behind Reliance Fresh",
+      "city": "Pune",
+      "state": "Maharashtra",
+      "pincode": "411038",
+      "pickupLocation": "Girls Hostel B / Canteen",
+      "fullAddress": "Flat 203, Sai Blossom Girls PG, Green Park Society, Gate 2 Road, Pune, Maharashtra - 411038",
+      "hostel": "Off-Campus PG / Day Scholar",
+      "isVerified": true,
+      "isEmailVerified": true,
+      "isPhoneVerified": true,
+      "isAddressVerified": true,
+      "avatar": "https://images.unsplash.com/photo-1517841905240-472988babdf9?w=150&auto=format&fit=crop&q=80",
+      "trustScore": 4.8,
+      "dealsCount": 12,
+      "isProfileComplete": true,
+      "createdAt": "2026-02-10T12:00:00Z"
+    },
+    {
+      "id": "user_3",
+      "name": "Rohan Verma",
+      "email": "rohan.v@campus.edu",
+      "phone": "+91 9988776655",
+      "college": "National Institute of Technology",
+      "branch": "Mechanical Engineering",
+      "year": "2nd Year",
+      "semester": "3rd Semester",
+      "rollNo": "2023ME077",
+      "addressType": "Campus Hostel / Dorm",
+      "roomNo": "Room 108, 1st Floor",
+      "buildingName": "Hostel Block 1 (Junior Boys)",
+      "streetArea": "North Campus Quad",
+      "landmark": "Near North Canteen",
+      "city": "Pune",
+      "state": "Maharashtra",
+      "pincode": "411038",
+      "pickupLocation": "Hostel Block 1 / Main Gate",
+      "fullAddress": "Room 108, Hostel Block 1, North Campus Quad, Pune, Maharashtra - 411038",
+      "hostel": "Hostel Block 1 (Junior Boys)",
+      "isVerified": true,
+      "isEmailVerified": true,
+      "isPhoneVerified": true,
+      "isAddressVerified": true,
+      "avatar": "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
+      "trustScore": 4.5,
+      "dealsCount": 4,
+      "isProfileComplete": true,
+      "createdAt": "2026-05-01T08:30:00Z"
+    },
+    {
+      "id": "user_kampus_store",
+      "name": "UniMandi Official SAC Store & Print Hub",
+      "email": "store.sac@campus.edu",
+      "phone": "+91 9822334455",
+      "college": "National Institute of Technology",
+      "branch": "SAC Commercial Store",
+      "year": "Staff / Vendor",
+      "semester": "Official Vendor",
+      "rollNo": "VENDOR-SAC-01",
+      "role": "merchant",
+      "addressType": "Campus Shop",
+      "roomNo": "Shop No. 2, Ground Floor",
+      "buildingName": "Student Activity Center (SAC)",
+      "streetArea": "Central Campus Plaza",
+      "landmark": "Opposite Admin Building",
+      "city": "Pune",
+      "state": "Maharashtra",
+      "pincode": "411038",
+      "pickupLocation": "SAC Counter 2",
+      "fullAddress": "Shop 2, SAC Building, Central Campus Plaza, NIT Pune - 411038",
+      "hostel": "Campus Commercial Hub",
+      "isVerified": true,
+      "isEmailVerified": true,
+      "isPhoneVerified": true,
+      "isAddressVerified": true,
+      "avatar": "https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=150&auto=format&fit=crop&q=80",
+      "trustScore": 5,
+      "dealsCount": 1420,
+      "isProfileComplete": true,
+      "createdAt": "2025-08-01T00:00:00Z"
+    }
+  ],
+  "listings": [
+    {
+      "id": "item_101",
+      "userId": "user_1",
+      "type": "Rent",
+      "category": "Books & Notes",
+      "subcategory": "Textbooks",
+      "title": "Operating Systems Principles (Silberschatz 10th Ed) + Hand-written Class Notes",
+      "description": "Mint condition textbook used for CS301. Includes handwritten notes with solved previous 5-year exam papers. Zero markings inside.",
+      "condition": "Good",
+      "price": 60,
+      "rentDuration": "per week",
+      "location": "Hostel Block 4, Room 212 / CS Dept",
+      "status": "Reserved",
+      "genderTarget": "Any",
+      "images": [
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1456513080510-7bf3a84b82f8?w=600&auto=format&fit=crop&q=80"
+      ],
+      "targetBranch": "Computer Engineering",
+      "targetYear": "3rd Year",
+      "views": 89,
+      "createdAt": "2026-09-02T14:20:00Z",
+      "updatedAt": "2026-09-12T14:27:18.960Z"
+    },
+    {
+      "id": "item_102",
+      "userId": "user_2",
+      "type": "Sell",
+      "category": "Electronics",
+      "subcategory": "Calculators",
+      "title": "Texas Instruments TI-84 Plus Graphic Calculator",
+      "description": "Essential for advanced engineering math and calculus. Fresh batteries included, LCD screen is crystal clear, minor wear on cover.",
+      "condition": "Good",
+      "price": 1800,
+      "rentDuration": null,
+      "location": "Girls Hostel B, Near Main Canteen",
+      "status": "Available",
+      "genderTarget": "Any",
+      "images": [
+        "https://images.unsplash.com/photo-1587145820266-a5951ee6f620?w=600&auto=format&fit=crop&q=80"
+      ],
+      "targetBranch": "Electronics & Communication",
+      "targetYear": "2nd Year",
+      "views": 142,
+      "createdAt": "2026-09-04T09:15:00Z",
+      "updatedAt": "2026-09-15T14:57:16.378Z"
+    },
+    {
+      "id": "item_103",
+      "userId": "user_2",
+      "type": "Rent",
+      "category": "Lab & Project Kits",
+      "subcategory": "Electronics Kits",
+      "title": "Complete Arduino Starter Kit + 25 Sensor Modules + Jumper Wires",
+      "description": "Used for IoT microcontrollers lab. Includes UNO R3, breadboards, ultrasonic, DHT11, servo motors, and display modules.",
+      "condition": "New",
+      "price": 150,
+      "rentDuration": "per semester",
+      "location": "ECE Dept Lab 3 / Student Center",
+      "status": "Available",
+      "genderTarget": "Any",
+      "images": [
+        "https://images.unsplash.com/photo-1553406830-ef2513450d76?w=600&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1517077304055-6e89abbf09b0?w=600&auto=format&fit=crop&q=80"
+      ],
+      "targetBranch": "Electronics & Communication",
+      "targetYear": "2nd Year",
+      "views": 210,
+      "createdAt": "2026-09-05T11:40:00Z"
+    },
+    {
+      "id": "item_104",
+      "userId": "user_3",
+      "type": "Sell",
+      "category": "Hostel & PG Living",
+      "subcategory": "Girls Hostels",
+      "title": "Spacious AC Single Room in Verified Girls PG (Near Gate 2)",
+      "description": "Fully furnished with Wi-Fi, 3 times hygienic food, power backup, study table and washing machine. Female students only.",
+      "condition": "New",
+      "price": 6500,
+      "rentDuration": "per month",
+      "location": "Off-Campus PGs (Gate 1 & 2)",
+      "status": "Available",
+      "genderTarget": "Girls Only",
+      "images": [
+        "https://images.unsplash.com/photo-1522771739844-6a9f6d5f14af?w=600&auto=format&fit=crop&q=80",
+        "https://images.unsplash.com/photo-1595526114035-0d45ed16cfbf?w=600&auto=format&fit=crop&q=80"
+      ],
+      "targetBranch": "All Branches",
+      "targetYear": "All Years",
+      "views": 340,
+      "createdAt": "2026-09-06T12:00:00Z"
+    },
+    {
+      "id": "item_105",
+      "userId": "user_1",
+      "type": "Sell",
+      "category": "Vehicles & Cycles",
+      "subcategory": "Geared Cycles",
+      "title": "Hero Sprint Pro 21-Speed Gear Bicycle + Anti-theft Cable Lock",
+      "description": "Smooth disc brakes, 27.5-inch wheels, front suspension. Serviced last month at Campus Cycle Hub.",
+      "condition": "Good",
+      "price": 3200,
+      "rentDuration": null,
+      "location": "Boys Hostels (Blocks 1-4)",
+      "status": "Available",
+      "genderTarget": "Any",
+      "images": [
+        "https://images.unsplash.com/photo-1485965120184-e220f721d03e?w=600&auto=format&fit=crop&q=80"
+      ],
+      "targetBranch": "All Branches",
+      "targetYear": "All Years",
+      "views": 195,
+      "createdAt": "2026-09-07T15:30:00Z"
+    }
+  ],
+  "products": [
+    {
+      "id": "tn_prod_1",
+      "name": "Complete Engineering Drawing Kit (Mini Drafter + Compass + Clips + Sheet Holder)",
+      "category": "Drawing & Drafting",
+      "price": 650,
+      "originalPrice": 850,
+      "inStock": true,
+      "stockCount": 44,
+      "unit": "kit",
+      "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80",
+      "description": "Official NIT approved mini drafter with steel rod, clamp, drafting scales, protractor, and water-resistant storage bag.",
+      "isBestseller": true
+    },
+    {
+      "id": "tn_prod_2",
+      "name": "Engineering Physics & Chemistry Official Lab Manuals + Hardcover Record (Set of 2)",
+      "category": "Lab Records & Manuals",
+      "price": 180,
+      "originalPrice": 240,
+      "inStock": true,
+      "stockCount": 120,
+      "unit": "set",
+      "image": "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80",
+      "description": "Official college syllabus verified experiments manual with graph sheets and certified pre-printed index format.",
+      "isBestseller": true
+    },
+    {
+      "id": "tn_prod_3",
+      "name": "Casio FX-991EX Classwiz Scientific Calculator (Non-Programmable)",
+      "category": "Electronics & Tech",
+      "price": 1390,
+      "originalPrice": 1595,
+      "inStock": true,
+      "stockCount": 22,
+      "unit": "piece",
+      "image": "https://images.unsplash.com/photo-1587145820266-a5951ee6f620?w=600&auto=format&fit=crop&q=80",
+      "description": "552 functions, high-resolution LCD screen, permitted in all university mid-term and semester examinations.",
+      "isBestseller": false
+    },
+    {
+      "id": "tn_prod_4",
+      "name": "A2 Engineering Drawing Sheets Pack (20 Sheets, 180 GSM Ivory Paper)",
+      "category": "Drawing & Drafting",
+      "price": 120,
+      "originalPrice": 160,
+      "inStock": true,
+      "stockCount": 85,
+      "unit": "pack",
+      "image": "https://images.unsplash.com/photo-1586075010923-2dd4570fb338?w=600&auto=format&fit=crop&q=80",
+      "description": "Smooth finish heavy cartridge sheets, pre-bordered with college title block format.",
+      "isBestseller": false
+    }
+  ],
+  "orders": [
+    {
+      "id": "ord_1789399222090",
+      "pickupCode": "UM-715463",
+      "studentId": "user_1789302530250",
+      "studentName": "Anuj",
+      "studentRoll": "2024CS995",
+      "studentBranch": "Computer Engineering",
+      "items": [
+        {
+          "productId": "tn_prod_1",
+          "name": "Complete Engineering Drawing Kit (Mini Drafter + Compass + Clips + Sheet Holder)",
+          "price": 650,
+          "unit": "kit",
+          "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80",
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 650,
+      "status": "Ready for Pickup",
+      "placedAt": "2026-09-14T15:20:22.090Z",
+      "pickupSlot": "Today, Counter Pickup (SAC Counter #2)",
+      "pickupLocation": "UniMandi SAC Central Store Counter #2",
+      "qrDataPayload": "UNIMANDI-SAC-715463-user_1789302530250-1789399222090",
+      "paymentMethod": "Campus Direct UPI",
+      "paymentId": "order_sim_1789399222061",
+      "paymentStatus": "Paid & Verified"
+    },
+    {
+      "id": "ord_101",
+      "pickupCode": "TN-849201",
+      "studentId": "user_3",
+      "studentName": "Rohan Verma",
+      "studentRoll": "2023ME077",
+      "studentBranch": "Mechanical Engineering",
+      "items": [
+        {
+          "productId": "tn_prod_2",
+          "name": "Engineering Physics & Chemistry Official Lab Manuals",
+          "quantity": 1,
+          "price": 180
+        }
+      ],
+      "totalAmount": 180,
+      "status": "Ready for Pickup",
+      "placedAt": "2026-09-08T09:30:00Z",
+      "pickupSlot": "Today, 4:00 PM - 6:00 PM",
+      "pickupLocation": "SAC Ground Floor Counter #2",
+      "qrDataPayload": "RENTIFY-TN-ORD101-USER3-VERIFIED-2026",
+      "paymentMethod": "UPI Instant Token",
+      "paymentStatus": "Completed"
+    }
+  ],
+  "chats": [
+    {
+      "id": "chat_1789484223197",
+      "listingId": "item_102",
+      "buyerId": "user_1789302530250",
+      "sellerId": "user_2",
+      "activeOffer": {
+        "amount": 1100,
+        "offeredBy": "user_1789302530250",
+        "status": "pending",
+        "counterAmount": null,
+        "isFinalPrice": false,
+        "note": ""
+      },
+      "dealConfirmation": {
+        "buyerConfirmed": true,
+        "sellerConfirmed": false,
+        "completedAt": null
+      },
+      "messages": [
+        {
+          "id": "msg_1789484223197",
+          "senderId": "user_1789302530250",
+          "type": "text",
+          "text": "Hi! I am interested in your \"Texas Instruments TI-84 Plus Graphic Calculator\". Is it still available?",
+          "timestamp": "2026-09-15T14:57:03.197Z"
+        },
+        {
+          "id": "msg_offer_1789484230618_qwx3",
+          "senderId": "user_1789302530250",
+          "type": "offer",
+          "offerAmount": 1100,
+          "isFinalPrice": false,
+          "note": "",
+          "text": "🤝 Proposed Offer: ₹1,100",
+          "timestamp": "2026-09-15T14:57:10.618Z"
+        },
+        {
+          "id": "msg_offer_1789484230641_q97e",
+          "senderId": "user_1789302530250",
+          "type": "offer",
+          "offerAmount": 1100,
+          "isFinalPrice": false,
+          "note": "",
+          "text": "🤝 Proposed Offer: ₹1,100",
+          "timestamp": "2026-09-15T14:57:10.641Z"
+        },
+        {
+          "id": "msg_sys_1789484236334_4nyx",
+          "senderId": "system",
+          "type": "system",
+          "text": "⏳ Anuj confirmed & locked the deal at ₹1,100. Awaiting confirmation from the other party to seal the deal!",
+          "timestamp": "2026-09-15T14:57:16.334Z"
+        }
+      ],
+      "updatedAt": "2026-09-15T14:57:16.334Z",
+      "finalAmount": 1100
+    },
+    {
+      "id": "chat_1789403930213",
+      "listingId": "item_103",
+      "buyerId": "user_1789302530250",
+      "sellerId": "user_2",
+      "activeOffer": {
+        "amount": 135,
+        "offeredBy": "user_1789302530250",
+        "status": "pending",
+        "counterAmount": null,
+        "isFinalPrice": false,
+        "note": ""
+      },
+      "dealConfirmation": {
+        "buyerConfirmed": false,
+        "sellerConfirmed": false,
+        "completedAt": null
+      },
+      "messages": [
+        {
+          "id": "msg_1789403930214",
+          "senderId": "user_1789302530250",
+          "type": "text",
+          "text": "Hi! I am interested in your \"Complete Arduino Starter Kit + 25 Sensor Modules + Jumper Wires\". Is it still available?",
+          "timestamp": "2026-09-14T16:38:50.214Z"
+        },
+        {
+          "id": "msg_1789403981007_3pfulz",
+          "senderId": "user_1789302530250",
+          "text": "Hello! Is this item still available?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-14T16:39:41.053Z"
+        },
+        {
+          "id": "msg_offer_1789404063401_9wqt",
+          "senderId": "user_1789302530250",
+          "type": "offer",
+          "offerAmount": 128,
+          "isFinalPrice": false,
+          "note": "",
+          "text": "🤝 Proposed Offer: ₹128",
+          "timestamp": "2026-09-14T16:41:03.401Z"
+        },
+        {
+          "id": "msg_offer_1789404063426_zjsc",
+          "senderId": "user_1789302530250",
+          "type": "offer",
+          "offerAmount": 128,
+          "isFinalPrice": false,
+          "note": "",
+          "text": "🤝 Proposed Offer: ₹128",
+          "timestamp": "2026-09-14T16:41:03.427Z"
+        },
+        {
+          "id": "msg_offer_1789473445731_753d",
+          "senderId": "user_1789302530250",
+          "type": "offer",
+          "offerAmount": 135,
+          "isFinalPrice": false,
+          "note": "",
+          "text": "🤝 Proposed Offer: ₹135",
+          "timestamp": "2026-09-15T11:57:25.792Z"
+        }
+      ],
+      "updatedAt": "2026-09-15T11:57:25.792Z"
+    },
+    {
+      "id": "chat_1789399046158",
+      "listingId": "item_105",
+      "buyerId": "user_1789302530250",
+      "sellerId": "user_1",
+      "activeOffer": {
+        "amount": null,
+        "offeredBy": null,
+        "status": "pending",
+        "counterAmount": null
+      },
+      "dealConfirmation": {
+        "buyerConfirmed": false,
+        "sellerConfirmed": false,
+        "completedAt": null
+      },
+      "messages": [
+        {
+          "id": "msg_1789399046158",
+          "senderId": "user_1789302530250",
+          "type": "text",
+          "text": "Hi! I am interested in your \"Hero Sprint Pro 21-Speed Gear Bicycle + Anti-theft Cable Lock\". Is it still available?",
+          "timestamp": "2026-09-14T15:17:26.158Z"
+        }
+      ],
+      "updatedAt": "2026-09-14T15:17:26.158Z"
+    },
+    {
+      "id": "chat_1789223328002",
+      "listingId": "item_102",
+      "buyerId": "user_1",
+      "sellerId": "user_2",
+      "activeOffer": {
+        "amount": 1620,
+        "offeredBy": "user_1",
+        "status": "pending",
+        "counterAmount": null
+      },
+      "dealConfirmation": {
+        "buyerConfirmed": false,
+        "sellerConfirmed": false,
+        "completedAt": null
+      },
+      "messages": [
+        {
+          "id": "msg_1789223328002",
+          "senderId": "user_1",
+          "type": "text",
+          "text": "Hi! I am interested in your \"Texas Instruments TI-84 Plus Graphic Calculator\". Is it still available?",
+          "timestamp": "2026-09-12T14:28:48.002Z"
+        },
+        {
+          "id": "msg_offer_1789223459238_ije2",
+          "senderId": "user_1",
+          "type": "offer",
+          "offerAmount": 1620,
+          "text": "🤝 Made an Offer: ₹1,620",
+          "timestamp": "2026-09-12T14:30:59.238Z"
+        },
+        {
+          "id": "msg_offer_1789223459250",
+          "senderId": "user_1",
+          "type": "offer",
+          "offerAmount": 1620,
+          "text": "🤝 Made an Offer: ₹1,620",
+          "timestamp": "2026-09-12T14:30:59.250Z"
+        }
+      ],
+      "updatedAt": "2026-09-12T14:30:59.250Z"
+    },
+    {
+      "id": "chat_1789139913555",
+      "listingId": "item_103",
+      "buyerId": "user_1",
+      "sellerId": "user_2",
+      "activeOffer": {
+        "amount": null,
+        "offeredBy": null,
+        "status": "pending",
+        "counterAmount": null
+      },
+      "dealConfirmation": {
+        "buyerConfirmed": false,
+        "sellerConfirmed": false,
+        "completedAt": null
+      },
+      "messages": [
+        {
+          "id": "msg_1789139913555",
+          "senderId": "user_1",
+          "type": "text",
+          "text": "Hi! I am interested in your \"Complete Arduino Starter Kit + 25 Sensor Modules + Jumper Wires\". Is it still available?",
+          "timestamp": "2026-09-11T15:18:33.555Z"
+        }
+      ],
+      "updatedAt": "2026-09-11T15:18:33.555Z"
+    },
+    {
+      "id": "chat_201",
+      "listingId": "item_101",
+      "buyerId": "user_3",
+      "sellerId": "user_1",
+      "activeOffer": {
+        "amount": 50,
+        "offeredBy": "user_3",
+        "status": "accepted",
+        "counterAmount": null
+      },
+      "dealConfirmation": {
+        "buyerConfirmed": true,
+        "sellerConfirmed": false,
+        "completedAt": null
+      },
+      "messages": [
+        {
+          "id": "msg_1",
+          "senderId": "user_3",
+          "text": "Hi Aarav, is the OS book with notes still available?",
+          "timestamp": "2026-09-08T10:10:00Z"
+        },
+        {
+          "id": "msg_offer_1",
+          "senderId": "user_3",
+          "type": "offer",
+          "offerAmount": 50,
+          "text": "🤝 Proposing an offer of ₹50/week (Listed: ₹60)",
+          "timestamp": "2026-09-08T10:12:00Z"
+        },
+        {
+          "id": "msg_2",
+          "senderId": "user_1",
+          "text": "Yes Rohan, offer accepted! You can pick it up from Hostel 4 tonight.",
+          "timestamp": "2026-09-08T10:15:00Z"
+        },
+        {
+          "id": "msg_1789138620985_qbyi",
+          "senderId": "user_1",
+          "text": "Is this still available?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-11T14:57:00.985Z"
+        },
+        {
+          "id": "msg_1789138621065_c4ir",
+          "senderId": "user_1",
+          "type": "text",
+          "offerAmount": null,
+          "text": "Is this still available?",
+          "timestamp": "2026-09-11T14:57:01.065Z"
+        },
+        {
+          "id": "msg_1789138625062_o116",
+          "senderId": "user_1",
+          "text": "Can we meet near SAC / Library?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-11T14:57:05.062Z"
+        },
+        {
+          "id": "msg_1789138625070_wzv6",
+          "senderId": "user_1",
+          "type": "text",
+          "offerAmount": null,
+          "text": "Can we meet near SAC / Library?",
+          "timestamp": "2026-09-11T14:57:05.070Z"
+        },
+        {
+          "id": "msg_1789138641110_dgek",
+          "senderId": "user_3",
+          "text": "Can you do a quick student discount?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-11T14:57:21.110Z"
+        },
+        {
+          "id": "msg_1789138641121_teha",
+          "senderId": "user_3",
+          "type": "text",
+          "offerAmount": null,
+          "text": "Can you do a quick student discount?",
+          "timestamp": "2026-09-11T14:57:21.121Z"
+        },
+        {
+          "id": "msg_1789138642994_4app",
+          "senderId": "user_3",
+          "text": "Can you do a quick student discount?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-11T14:57:22.994Z"
+        },
+        {
+          "id": "msg_1789138643004_5gt4",
+          "senderId": "user_3",
+          "type": "text",
+          "offerAmount": null,
+          "text": "Can you do a quick student discount?",
+          "timestamp": "2026-09-11T14:57:23.004Z"
+        },
+        {
+          "id": "msg_1789139898759_63kj",
+          "senderId": "user_1",
+          "text": "Is this still available?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-11T15:18:18.759Z"
+        },
+        {
+          "id": "msg_1789139898774_uq5t",
+          "senderId": "user_1",
+          "type": "text",
+          "offerAmount": null,
+          "text": "Is this still available?",
+          "timestamp": "2026-09-11T15:18:18.774Z"
+        },
+        {
+          "id": "msg_1789223210468_1mujuz",
+          "senderId": "user_1",
+          "text": "Can we meet near SAC / Library?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-12T14:26:50.469Z"
+        },
+        {
+          "id": "msg_1789223235615_t3drfu",
+          "senderId": "user_1",
+          "text": "we should have a deal in 20 ruppes",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-12T14:27:15.615Z"
+        }
+      ],
+      "updatedAt": "2026-09-12T14:27:15.615Z"
+    }
+  ],
+  "ratings": [
+    {
+      "id": "rat_1",
+      "dealListingId": "item_99",
+      "fromUserId": "user_3",
+      "toUserId": "user_1",
+      "rating": 5,
+      "tags": [
+        "On time",
+        "Item as described",
+        "Good communication"
+      ],
+      "comment": "Aarav handed over the notes right at the promised time. Extremely helpful senior!",
+      "createdAt": "2026-08-28T18:00:00Z"
+    }
+  ],
+  "reports": [],
+  "blockedUsers": []
+}
