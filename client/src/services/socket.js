@@ -4,8 +4,10 @@ let socketInstance = null;
 
 export const getSocket = () => {
   if (!socketInstance) {
-    // In dev, Vite proxies /api to port 5000; connect socket to server port 5000 or current host
-    const socketUrl = window.location.hostname === "localhost" ? "http://localhost:5000" : window.location.origin;
+    // In dev, Vite proxies /api to port 5000; in prod use VITE_SOCKET_URL or current host
+    const socketUrl =
+      import.meta.env.VITE_SOCKET_URL ||
+      (window.location.hostname === "localhost" ? "http://localhost:5000" : window.location.origin);
 
     socketInstance = io(socketUrl, {
       transports: ["websocket", "polling"],
