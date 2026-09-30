@@ -1,410 +1,524 @@
 import React, { useState } from "react";
 import {
-  ShieldCheck,
-  Mail,
-  Phone,
-  Sparkles,
-  ArrowRight,
-  GraduationCap,
-  Lock,
-  CheckCircle2,
-  BookOpen,
-  Layers,
-  ChevronRight
+  Mail, Lock, Eye, EyeOff, User, Phone, GraduationCap,
+  BookOpen, Building2, ArrowRight, Loader2, CheckCircle2,
+  ShieldCheck, AlertCircle, KeyRound, RefreshCw, ChevronRight,
+  Sparkles, X
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
 
-export const LoginScreen = () => {
-  const { loginWithGoogle, loginWithCollegeEmail, loginWithPhone, registeredUsers } = useAuth();
+// ─── Reusable Field ────────────────────────────────────────────────────────────
+const Field = ({ label, icon: Icon, required, children }) => (
+  <div>
+    <label className="block text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-1.5">
+      {label}{required && <span className="text-orange-500 ml-0.5">*</span>}
+    </label>
+    <div className="relative">
+      {Icon && (
+        <Icon className="absolute left-3.5 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400 pointer-events-none" />
+      )}
+      {children}
+    </div>
+  </div>
+);
 
-  const [authMethod, setAuthMethod] = useState("google"); // "google" | "email" | "phone"
-  const [googleEmailInput, setGoogleEmailInput] = useState("");
-  const [googleNameInput, setGoogleNameInput] = useState("");
+const inputClass = (hasIcon = true) =>
+  `w-full ${hasIcon ? "pl-10" : "px-4"} pr-4 py-3 rounded-xl border border-slate-200 bg-white text-[#121417] text-sm focus:outline-none focus:ring-2 focus:ring-[#FF5A1F]/40 focus:border-[#FF5A1F] transition-all placeholder:text-slate-400`;
 
-  const [emailInput, setEmailInput] = useState("");
-  const [nameInput, setNameInput] = useState("");
+// ─── Alert Box ─────────────────────────────────────────────────────────────────
+const Alert = ({ type, msg }) => {
+  if (!msg) return null;
+  const styles = {
+    error: "bg-red-50 border-red-200 text-red-700",
+    success: "bg-green-50 border-green-200 text-green-700",
+    info: "bg-blue-50 border-blue-200 text-blue-700",
+  };
+  const icons = {
+    error: <AlertCircle className="w-4 h-4 shrink-0" />,
+    success: <CheckCircle2 className="w-4 h-4 shrink-0" />,
+    info: <ShieldCheck className="w-4 h-4 shrink-0" />,
+  };
+  return (
+    <div className={`flex items-start gap-2.5 p-3 rounded-xl border text-xs font-medium ${styles[type] || styles.error}`}>
+      {icons[type]}
+      <span>{msg}</span>
+    </div>
+  );
+};
 
-  const [phoneInput, setPhoneInput] = useState("");
-  const [otpInput, setOtpInput] = useState("");
-  const [isOtpSent, setIsOtpSent] = useState(false);
+// ─── Forgot Password Modal ─────────────────────────────────────────────────────
+const ForgotPasswordModal = ({ onClose }) => {
+  const { forgotPassword, resetPassword } = useAuth();
+  const [step, setStep] = useState("email"); // "email" | "reset"
+  const [email, setEmail] = useState("");
+  const [token, setToken] = useState("");
+  const [newPass, setNewPass] = useState("");
+  const [confirmPass, setConfirmPass] = useState("");
+  const [showPass, setShowPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState(null); // { type, msg }
+  const [devToken, setDevToken] = useState("");
 
-  // Quick Google Sign-In
-  const handleGoogleSubmit = (e) => {
-    e?.preventDefault();
-    if (googleEmailInput.trim()) {
-      loginWithGoogle({
-        email: googleEmailInput.trim(),
-        name: googleNameInput.trim() || googleEmailInput.split("@")[0],
-      });
-    } else {
-      // Default standard Google sign-in with first senior persona
-      loginWithGoogle();
+  const handleRequestReset = async (e) => {
+    e.preventDefault();
+    setLoading(true);
+    setAlert(null);
+    try {
+      const res = await forgotPassword(email.trim());
+      if (res.resetToken) setDevToken(res.resetToken); // dev only
+      setAlert({ type: "success", msg: res.message || "Reset code sent! Check your server console." });
+      setTimeout(() => setStep("reset"), 1500);
+    } catch (err) {
+      setAlert({ type: "error", msg: err.message || "Could not send reset code." });
+    } finally {
+      setLoading(false);
     }
   };
 
-  // College Email Sign-In
-  const handleEmailSubmit = (e) => {
+  const handleReset = async (e) => {
     e.preventDefault();
-    if (!emailInput.trim()) return;
-    loginWithCollegeEmail(emailInput.trim(), nameInput.trim());
-  };
-
-  // Phone OTP Sign-In
-  const handleSendOtp = (e) => {
-    e.preventDefault();
-    if (!phoneInput.trim()) return;
-    setIsOtpSent(true);
-  };
-
-  const handleVerifyOtp = (e) => {
-    e.preventDefault();
-    if (!otpInput.trim()) return;
-    loginWithPhone(phoneInput.trim(), otpInput.trim());
+    if (newPass !== confirmPass) {
+      setAlert({ type: "error", msg: "Passwords do not match." });
+      return;
+    }
+    if (newPass.length < 6) {
+      setAlert({ type: "error", msg: "Password must be at least 6 characters." });
+      return;
+    }
+    setLoading(true);
+    setAlert(null);
+    try {
+      const res = await resetPassword(email.trim(), token.trim(), newPass);
+      setAlert({ type: "success", msg: res.message || "Password reset! You can now log in." });
+      setTimeout(onClose, 2000);
+    } catch (err) {
+      setAlert({ type: "error", msg: err.message || "Could not reset password." });
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <div className="min-h-screen bg-cream-100 flex flex-col justify-between py-8 px-4 sm:px-6 lg:px-8 text-navy-800">
-      
-      {/* Top Header / Branding */}
-      <div className="max-w-md w-full mx-auto text-center pt-2 pb-6">
-        <div className="inline-flex items-center justify-center p-2 rounded-2xl bg-white shadow-md border border-cream-300/80 mb-3">
-          <img src="/logo.png" alt="UNIMANDI" className="w-16 h-16 object-contain rounded-xl" />
-        </div>
-        <h1 className="font-display font-black text-3xl text-navy-800 tracking-tight">
-          UNI<span className="text-[#FF5A1F]">MANDI</span>
-        </h1>
-        <p className="text-xs font-bold uppercase tracking-wider text-[#FF5A1F] mt-1">
-          Buy • Sell • Rent • Connect
-        </p>
-        <p className="text-xs text-slate-500 mt-0.5 font-medium">
-          Campus Rental & Resale Marketplace
-        </p>
-      </div>
+    <div className="fixed inset-0 z-50 flex items-center justify-center p-4" style={{ backdropFilter: "blur(8px)", backgroundColor: "rgba(0,0,0,0.5)" }}>
+      <div className="bg-white rounded-3xl shadow-2xl w-full max-w-md p-8 relative animate-reveal-up">
+        <button onClick={onClose} className="absolute top-4 right-4 w-8 h-8 rounded-full bg-slate-100 flex items-center justify-center hover:bg-slate-200 transition-colors">
+          <X className="w-4 h-4 text-slate-500" />
+        </button>
 
-      {/* Main Login Card */}
-      <div className="max-w-md w-full mx-auto bg-cream-50 rounded-3xl shadow-modal border border-cream-300 p-6 sm:p-8 animate-reveal-up text-left">
-        
-        <div className="mb-6">
-          <h2 className="font-serif font-bold text-xl text-navy-800">
-            Sign in to your Campus Account
-          </h2>
+        <div className="mb-6 text-center">
+          <div className="w-14 h-14 rounded-2xl bg-gradient-to-br from-[#FF5A1F] to-orange-400 flex items-center justify-center mx-auto mb-3 shadow-lg">
+            <KeyRound className="w-7 h-7 text-white" />
+          </div>
+          <h3 className="font-bold text-xl text-[#121417]">Reset Password</h3>
           <p className="text-xs text-slate-500 mt-1">
-            Access verified books, electronics, and lab equipment from your peers.
+            {step === "email" ? "Enter your registered email to receive a reset code" : "Enter the reset code and your new password"}
           </p>
         </div>
 
-        {/* Auth Method Navigation Tabs */}
-        <div className="grid grid-cols-3 gap-1 p-1 bg-cream-200/80 rounded-2xl border border-cream-300 mb-6 text-xs font-semibold">
-          <button
-            type="button"
-            onClick={() => setAuthMethod("google")}
-            className={`py-2 px-2 rounded-xl text-center transition-all ${
-              authMethod === "google"
-                ? "bg-navy-800 text-cream-100 shadow-sm"
-                : "text-slate-600 hover:text-navy-800"
-            }`}
-          >
-            Google Auth
-          </button>
-          <button
-            type="button"
-            onClick={() => setAuthMethod("email")}
-            className={`py-2 px-2 rounded-xl text-center transition-all ${
-              authMethod === "email"
-                ? "bg-navy-800 text-cream-100 shadow-sm"
-                : "text-slate-600 hover:text-navy-800"
-            }`}
-          >
-            College Email
-          </button>
-          <button
-            type="button"
-            onClick={() => setAuthMethod("phone")}
-            className={`py-2 px-2 rounded-xl text-center transition-all ${
-              authMethod === "phone"
-                ? "bg-navy-800 text-cream-100 shadow-sm"
-                : "text-slate-600 hover:text-navy-800"
-            }`}
-          >
-            Phone OTP
-          </button>
+        {alert && <div className="mb-4"><Alert type={alert.type} msg={alert.msg} /></div>}
+
+        {/* Step indicator */}
+        <div className="flex items-center gap-2 mb-6">
+          <div className={`flex-1 h-1.5 rounded-full transition-colors ${step === "email" ? "bg-[#FF5A1F]" : "bg-green-500"}`} />
+          <div className={`flex-1 h-1.5 rounded-full transition-colors ${step === "reset" ? "bg-[#FF5A1F]" : "bg-slate-200"}`} />
         </div>
 
-        {/* METHOD 1: Google OAuth API */}
-        {authMethod === "google" && (
-          <div className="space-y-4 animate-reveal-up">
-            {/* Direct 1-Click Google Button */}
-            <button
-              onClick={() => handleGoogleSubmit()}
-              className="w-full py-3 px-4 rounded-2xl bg-cream-50 hover:bg-cream-200/80 border-2 border-cream-300 text-navy-800 font-semibold text-sm transition-all duration-200 shadow-sm hover:shadow flex items-center justify-center gap-3 active:scale-[0.98]"
-            >
-              {/* Google G Logo SVG */}
-              <svg className="w-5 h-5" viewBox="0 0 24 24">
-                <path
-                  fill="#4285F4"
-                  d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"
-                />
-                <path
-                  fill="#34A853"
-                  d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"
-                />
-                <path
-                  fill="#FBBC05"
-                  d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.06H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.94l2.85-2.22.81-.63z"
-                />
-                <path
-                  fill="#EA4335"
-                  d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.06l3.66 2.84c.87-2.6 3.3-4.52 6.16-4.52z"
-                />
-              </svg>
-              <span>Continue with Google</span>
-            </button>
-
-            <div className="flex items-center gap-3 my-3">
-              <div className="flex-1 h-px bg-cream-300"></div>
-              <span className="text-[11px] text-slate-400 font-medium uppercase">Or Custom Google Account</span>
-              <div className="flex-1 h-px bg-cream-300"></div>
-            </div>
-
-            <form onSubmit={handleGoogleSubmit} className="space-y-3 text-xs">
-              <div>
-                <label className="block font-bold uppercase text-slate-500 text-[10px] mb-1">
-                  Google Email ID
-                </label>
-                <input
-                  type="email"
-                  placeholder="student@gmail.com or campus email"
-                  value={googleEmailInput}
-                  onChange={(e) => setGoogleEmailInput(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-cream-100 border border-cream-300 rounded-xl text-navy-800 text-xs focus:outline-none focus:ring-2 focus:ring-marigold-500/50"
-                />
-              </div>
-
-              <div>
-                <label className="block font-bold uppercase text-slate-500 text-[10px] mb-1">
-                  Your Full Name
-                </label>
-                <input
-                  type="text"
-                  placeholder="e.g. Aryan Khan"
-                  value={googleNameInput}
-                  onChange={(e) => setGoogleNameInput(e.target.value)}
-                  className="w-full px-3.5 py-2.5 bg-cream-100 border border-cream-300 rounded-xl text-navy-800 text-xs focus:outline-none focus:ring-2 focus:ring-marigold-500/50"
-                />
-              </div>
-
-              <button
-                type="submit"
-                className="btn-primary w-full text-xs py-2.5 shadow-sm font-bold mt-2"
-              >
-                <span>Sign in with this Google Email</span>
-                <ArrowRight className="w-3.5 h-3.5" />
-              </button>
-            </form>
-          </div>
-        )}
-
-        {/* METHOD 2: College Email Login */}
-        {authMethod === "email" && (
-          <form onSubmit={handleEmailSubmit} className="space-y-3.5 text-xs animate-reveal-up">
-            <div className="p-3 rounded-2xl bg-moss-50 border border-moss-500/30 text-moss-700 text-xs flex items-center gap-2.5">
-              <ShieldCheck className="w-5 h-5 text-moss-500 shrink-0" />
-              <span>Logging in with an official <strong>.edu</strong> or <strong>.ac.in</strong> email grants instant "Verified Student" badge.</span>
-            </div>
-
-            <div>
-              <label className="block font-bold uppercase text-slate-500 text-[10px] mb-1">
-                Official College Email *
-              </label>
-              <input
-                type="email"
-                required
-                placeholder="rollno@nit.edu or student@college.ac.in"
-                value={emailInput}
-                onChange={(e) => setEmailInput(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-cream-100 border border-cream-300 rounded-xl text-navy-800 text-xs focus:outline-none focus:ring-2 focus:ring-marigold-500/50"
-              />
-            </div>
-
-            <div>
-              <label className="block font-bold uppercase text-slate-500 text-[10px] mb-1">
-                Student Name
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. Priya Patel"
-                value={nameInput}
-                onChange={(e) => setNameInput(e.target.value)}
-                className="w-full px-3.5 py-2.5 bg-cream-100 border border-cream-300 rounded-xl text-navy-800 text-xs focus:outline-none focus:ring-2 focus:ring-marigold-500/50"
-              />
-            </div>
-
-            <button
-              type="submit"
-              className="btn-primary w-full text-xs py-2.5 shadow-sm font-bold"
-            >
-              <Sparkles className="w-3.5 h-3.5" />
-              <span>Continue with College Email</span>
+        {step === "email" ? (
+          <form onSubmit={handleRequestReset} className="space-y-4">
+            <Field label="Registered Email" icon={Mail} required>
+              <input type="email" required value={email} onChange={e => setEmail(e.target.value)}
+                placeholder="your@email.com" className={inputClass()} />
+            </Field>
+            <button type="submit" disabled={loading}
+              className="w-full py-3 px-4 rounded-xl bg-gradient-to-r from-[#FF5A1F] to-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 shadow-md">
+              {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <Mail className="w-4 h-4" />}
+              {loading ? "Sending..." : "Send Reset Code"}
             </button>
           </form>
-        )}
-
-        {/* METHOD 3: Phone OTP */}
-        {authMethod === "phone" && (
-          <div className="space-y-3.5 text-xs animate-reveal-up">
-            {!isOtpSent ? (
-              <form onSubmit={handleSendOtp} className="space-y-3">
-                <div>
-                  <label className="block font-bold uppercase text-slate-500 text-[10px] mb-1">
-                    Mobile Number *
-                  </label>
-                  <div className="relative">
-                    <span className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 font-semibold">
-                      +91
-                    </span>
-                    <input
-                      type="tel"
-                      required
-                      placeholder="98765 43210"
-                      value={phoneInput}
-                      onChange={(e) => setPhoneInput(e.target.value)}
-                      className="w-full pl-12 pr-3.5 py-2.5 bg-cream-100 border border-cream-300 rounded-xl text-navy-800 text-xs focus:outline-none focus:ring-2 focus:ring-marigold-500/50"
-                    />
-                  </div>
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn-primary w-full text-xs py-2.5 shadow-sm font-bold"
-                >
-                  <Phone className="w-3.5 h-3.5" />
-                  <span>Send Login OTP</span>
-                </button>
-              </form>
-            ) : (
-              <form onSubmit={handleVerifyOtp} className="space-y-3 animate-reveal-up">
-                <div className="p-2.5 rounded-xl bg-cream-200 text-navy-800 text-[11px] flex justify-between items-center">
-                  <span>OTP sent to: <strong>+91 {phoneInput}</strong></span>
-                  <button
-                    type="button"
-                    onClick={() => setIsOtpSent(false)}
-                    className="text-marigold-600 underline text-[10px]"
-                  >
-                    Change
-                  </button>
-                </div>
-
-                <div>
-                  <label className="block font-bold uppercase text-slate-500 text-[10px] mb-1">
-                    Enter 6-Digit OTP (Use: 123456)
-                  </label>
-                  <input
-                    type="text"
-                    required
-                    maxLength={6}
-                    placeholder="123456"
-                    value={otpInput}
-                    onChange={(e) => setOtpInput(e.target.value)}
-                    className="w-full tracking-widest text-center text-base font-bold px-3.5 py-2.5 bg-cream-100 border border-cream-300 rounded-xl text-navy-800 focus:outline-none focus:ring-2 focus:ring-marigold-500/50"
-                  />
-                </div>
-
-                <button
-                  type="submit"
-                  className="btn-primary w-full text-xs py-2.5 shadow-sm font-bold"
-                >
-                  <CheckCircle2 className="w-3.5 h-3.5" />
-                  <span>Verify OTP & Enter</span>
-                </button>
-              </form>
+        ) : (
+          <form onSubmit={handleReset} className="space-y-4">
+            {devToken && (
+              <Alert type="info" msg={`Dev mode: Your reset code is ${devToken} — in production this would be emailed.`} />
             )}
-          </div>
-        )}
-
-        {/* Demo Fast-Login Personas (For testing seniors, buyers, sellers in 1 click) */}
-        <div className="mt-6 pt-5 border-t border-cream-200">
-          <p className="text-[11px] font-bold uppercase tracking-wider text-slate-500 mb-2.5 text-center">
-            Or Test with Campus Demo Profiles:
-          </p>
-
-          <div className="space-y-1.5">
-            {/* Dedicated UniMandi Store Login Button */}
-            <button
-              onClick={() => {
-                const storeUser = registeredUsers.find((u) => u.id === "user_kampus_store") || {
-                  id: "user_kampus_store",
-                  name: "UniMandi Official SAC Store & Print Hub",
-                  email: "store.sac@campus.edu",
-                  branch: "Official Campus Store",
-                  year: "Counter #2 SAC",
-                  role: "merchant",
-                  isVerified: true,
-                  isProfileComplete: true,
-                  avatar: "https://images.unsplash.com/photo-1556742049-0a67c5574f73?w=150&auto=format&fit=crop&q=80"
-                };
-                loginWithGoogle(storeUser);
-              }}
-              className="w-full p-2.5 rounded-xl bg-[#121417] text-white hover:bg-[#23262F] text-left transition-all flex items-center justify-between shadow-xs border border-slate-700"
-            >
-              <div className="flex items-center gap-2.5">
-                <div className="w-8 h-8 rounded-lg bg-[#FF5A1F] flex items-center justify-center text-white font-bold">
-                  🏪
-                </div>
-                <div>
-                  <div className="flex items-center gap-1.5">
-                    <span className="text-xs font-bold text-white">
-                      UniMandi Official SAC Store
-                    </span>
-                    <span className="text-[9px] bg-[#FF5A1F] text-white px-1.5 py-0.2 rounded font-bold uppercase">
-                      Counter Login
-                    </span>
-                  </div>
-                  <span className="text-[10px] text-slate-300">
-                    Verify QR Codes, Manage Stock & Dispense Orders
-                  </span>
-                </div>
-              </div>
-              <ChevronRight className="w-4 h-4 text-[#FF5A1F]" />
-            </button>
-
-            {registeredUsers.filter((u) => u.id !== "user_kampus_store" && u.id !== "user_tanish_store").slice(0, 3).map((user) => (
-              <button
-                key={user.id}
-                onClick={() => loginWithGoogle({ email: user.email, name: user.name, avatar: user.avatar })}
-                className="w-full p-2 rounded-xl bg-cream-100 hover:bg-cream-200/90 border border-cream-300 text-left transition-colors flex items-center justify-between"
-              >
-                <div className="flex items-center gap-2.5">
-                  <img
-                    src={user.avatar}
-                    alt={user.name}
-                    className="w-7 h-7 rounded-lg object-cover ring-1 ring-cream-300"
-                  />
-                  <div>
-                    <span className="text-xs font-bold text-navy-800 block">
-                      {user.name}
-                    </span>
-                    <span className="text-[10px] text-slate-500">
-                      {user.branch} • {user.year}
-                    </span>
-                  </div>
-                </div>
-                <ChevronRight className="w-4 h-4 text-slate-400" />
+            <Field label="Reset Code (6 digits)" icon={KeyRound} required>
+              <input type="text" required maxLength={6} value={token} onChange={e => setToken(e.target.value)}
+                placeholder="123456" className={`${inputClass()} tracking-widest text-center font-bold text-lg`} />
+            </Field>
+            <Field label="New Password" icon={Lock} required>
+              <input type={showPass ? "text" : "password"} required value={newPass} onChange={e => setNewPass(e.target.value)}
+                placeholder="Min. 6 characters" className={`${inputClass()} pr-10`} />
+              <button type="button" onClick={() => setShowPass(s => !s)}
+                className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600">
+                {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
               </button>
-            ))}
-          </div>
+            </Field>
+            <Field label="Confirm New Password" icon={Lock} required>
+              <input type={showPass ? "text" : "password"} required value={confirmPass} onChange={e => setConfirmPass(e.target.value)}
+                placeholder="Re-enter new password" className={inputClass()} />
+            </Field>
+            <div className="flex gap-2">
+              <button type="button" onClick={() => setStep("email")}
+                className="flex-1 py-3 rounded-xl border border-slate-200 text-slate-600 font-semibold text-sm hover:bg-slate-50 transition-colors flex items-center justify-center gap-2">
+                <RefreshCw className="w-4 h-4" /> New Code
+              </button>
+              <button type="submit" disabled={loading}
+                className="flex-1 py-3 px-4 rounded-xl bg-gradient-to-r from-[#FF5A1F] to-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 transition-opacity disabled:opacity-60 shadow-md">
+                {loading ? <Loader2 className="w-4 h-4 animate-spin" /> : <CheckCircle2 className="w-4 h-4" />}
+                {loading ? "Resetting..." : "Reset Password"}
+              </button>
+            </div>
+          </form>
+        )}
+      </div>
+    </div>
+  );
+};
+
+// ─── MAIN LOGIN SCREEN ─────────────────────────────────────────────────────────
+export const LoginScreen = () => {
+  const { loginWithCredentials, registerUser, loginWithGoogle, registeredUsers } = useAuth();
+
+  const [mode, setMode] = useState("login"); // "login" | "signup"
+  const [showForgot, setShowForgot] = useState(false);
+  const [showPass, setShowPass] = useState(false);
+  const [showConfirmPass, setShowConfirmPass] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [alert, setAlert] = useState(null);
+
+  // Login form state
+  const [loginEmail, setLoginEmail] = useState("");
+  const [loginPass, setLoginPass] = useState("");
+
+  // Sign-up form state
+  const [signupData, setSignupData] = useState({
+    name: "", email: "", password: "", confirmPassword: "",
+    phone: "", college: "", branch: "", year: "", semester: "",
+    rollNo: "", hostel: "", roomNo: "", city: "Pune", state: "Maharashtra", pincode: "411038",
+  });
+
+  const updateSignup = (field) => (e) => setSignupData(prev => ({ ...prev, [field]: e.target.value }));
+
+  // ─── Handle Login ───────────────────────────────────────────────────────────
+  const handleLogin = async (e) => {
+    e.preventDefault();
+    setAlert(null);
+    if (!loginEmail.trim() || !loginPass.trim()) {
+      setAlert({ type: "error", msg: "Please enter your email and password." });
+      return;
+    }
+    setLoading(true);
+    try {
+      await loginWithCredentials(loginEmail.trim(), loginPass);
+    } catch (err) {
+      setAlert({ type: "error", msg: err.message || "Login failed. Check your credentials." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // ─── Handle Sign Up ─────────────────────────────────────────────────────────
+  const handleSignup = async (e) => {
+    e.preventDefault();
+    setAlert(null);
+    const { name, email, password, confirmPassword, phone, college, branch, year, semester, rollNo, hostel, roomNo, city, state, pincode } = signupData;
+
+    if (!name || !email || !password) {
+      setAlert({ type: "error", msg: "Name, email and password are required." });
+      return;
+    }
+    if (password !== confirmPassword) {
+      setAlert({ type: "error", msg: "Passwords do not match." });
+      return;
+    }
+    if (password.length < 6) {
+      setAlert({ type: "error", msg: "Password must be at least 6 characters." });
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await registerUser({ name, email, password, phone, college, branch, year, semester, rollNo, hostel, roomNo, city, state, pincode });
+    } catch (err) {
+      setAlert({ type: "error", msg: err.message || "Registration failed. Please try again." });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const yearOptions = ["1st Year", "2nd Year", "3rd Year", "4th Year", "5th Year"];
+  const semesterOptions = ["1st Semester", "2nd Semester", "3rd Semester", "4th Semester", "5th Semester", "6th Semester", "7th Semester", "8th Semester"];
+  const branchOptions = ["Computer Engineering", "Electronics & Communication", "Mechanical Engineering", "Civil Engineering", "Electrical Engineering", "Chemical Engineering", "Information Technology", "Other"];
+
+  return (
+    <>
+      {showForgot && <ForgotPasswordModal onClose={() => setShowForgot(false)} />}
+
+      <div className="min-h-screen bg-gradient-to-br from-slate-50 via-orange-50/30 to-slate-100 flex flex-col">
+
+        {/* ─── Background decorative bubbles ─── */}
+        <div className="fixed inset-0 overflow-hidden pointer-events-none -z-10">
+          <div className="absolute -top-40 -right-40 w-96 h-96 rounded-full bg-[#FF5A1F]/8 blur-3xl" />
+          <div className="absolute -bottom-40 -left-40 w-96 h-96 rounded-full bg-orange-400/8 blur-3xl" />
+          <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] rounded-full bg-amber-50/60 blur-3xl" />
         </div>
 
-      </div>
+        <div className="flex-1 flex flex-col items-center justify-start py-10 px-4 sm:px-6">
 
-      {/* Trust & Safety highlights */}
-      <div className="max-w-md w-full mx-auto text-center mt-6 text-slate-500 text-xs flex justify-center gap-4">
-        <span>🔒 Zero spam groups</span>
-        <span>•</span>
-        <span>🤝 Verified meetups</span>
-        <span>•</span>
-        <span>⚡ 100% In-app safe</span>
-      </div>
+          {/* ─── Branding ─── */}
+          <div className="text-center mb-8 animate-reveal-up">
+            <div className="inline-flex items-center justify-center w-20 h-20 rounded-3xl bg-white shadow-xl border border-orange-100 mb-4">
+              <span className="text-4xl">🏪</span>
+            </div>
+            <h1 className="text-4xl font-black tracking-tight text-[#121417]">
+              UNI<span className="text-[#FF5A1F]">MANDI</span>
+            </h1>
+            <p className="text-[11px] font-bold uppercase tracking-widest text-[#FF5A1F] mt-1">
+              Buy • Sell • Rent • Connect
+            </p>
+            <p className="text-xs text-slate-500 mt-0.5">Campus Rental & Resale Marketplace</p>
+          </div>
 
-    </div>
+          {/* ─── Main Card ─── */}
+          <div className="w-full max-w-md bg-white rounded-3xl shadow-2xl border border-slate-100/80 overflow-hidden animate-reveal-up">
+
+            {/* Tab Toggle */}
+            <div className="flex border-b border-slate-100">
+              <button
+                onClick={() => { setMode("login"); setAlert(null); }}
+                className={`flex-1 py-4 text-sm font-bold transition-all ${mode === "login"
+                  ? "text-[#FF5A1F] border-b-2 border-[#FF5A1F] bg-orange-50/50"
+                  : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Sign In
+              </button>
+              <button
+                onClick={() => { setMode("signup"); setAlert(null); }}
+                className={`flex-1 py-4 text-sm font-bold transition-all ${mode === "signup"
+                  ? "text-[#FF5A1F] border-b-2 border-[#FF5A1F] bg-orange-50/50"
+                  : "text-slate-500 hover:text-slate-700"}`}
+              >
+                Create Account
+              </button>
+            </div>
+
+            <div className="p-6 sm:p-8">
+
+              {alert && <div className="mb-5"><Alert type={alert.type} msg={alert.msg} /></div>}
+
+              {/* ════════════════ LOGIN FORM ════════════════ */}
+              {mode === "login" && (
+                <form onSubmit={handleLogin} className="space-y-4 animate-reveal-up">
+                  <div className="mb-2">
+                    <h2 className="text-xl font-bold text-[#121417]">Welcome back! 👋</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Sign in with your UNIMANDI account</p>
+                  </div>
+
+                  <Field label="Email Address" icon={Mail} required>
+                    <input type="email" required value={loginEmail} onChange={e => setLoginEmail(e.target.value)}
+                      placeholder="student@gmail.com" className={inputClass()} />
+                  </Field>
+
+                  <Field label="Password" icon={Lock} required>
+                    <input type={showPass ? "text" : "password"} required value={loginPass} onChange={e => setLoginPass(e.target.value)}
+                      placeholder="Your password" className={`${inputClass()} pr-10`} />
+                    <button type="button" onClick={() => setShowPass(s => !s)}
+                      className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 hover:text-slate-600 transition-colors">
+                      {showPass ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </Field>
+
+                  <div className="flex justify-end">
+                    <button type="button" onClick={() => setShowForgot(true)}
+                      className="text-xs text-[#FF5A1F] hover:underline font-semibold">
+                      Forgot Password?
+                    </button>
+                  </div>
+
+                  <button type="submit" disabled={loading}
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FF5A1F] to-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 shadow-lg shadow-orange-200 mt-2">
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <ArrowRight className="w-5 h-5" />}
+                    {loading ? "Signing in..." : "Sign In to UNIMANDI"}
+                  </button>
+
+                  {/* Social divider */}
+                  <div className="flex items-center gap-3 my-1">
+                    <div className="flex-1 h-px bg-slate-100" />
+                    <span className="text-[11px] text-slate-400 font-medium uppercase">Or sign in as</span>
+                    <div className="flex-1 h-px bg-slate-100" />
+                  </div>
+
+                  {/* Quick Demo logins */}
+                  <div className="space-y-1.5">
+                    {registeredUsers.filter(u => u.isProfileComplete).slice(0, 3).map(user => (
+                      <button key={user.id} type="button"
+                        onClick={() => loginWithGoogle({ email: user.email, name: user.name, avatar: user.avatar })}
+                        className="w-full flex items-center gap-3 p-2.5 rounded-xl border border-slate-100 hover:border-orange-200 hover:bg-orange-50/50 transition-all text-left group">
+                        <img src={user.avatar} alt={user.name} className="w-8 h-8 rounded-lg object-cover ring-1 ring-slate-200" />
+                        <div className="flex-1 min-w-0">
+                          <div className="text-xs font-bold text-[#121417] truncate">{user.name}</div>
+                          <div className="text-[10px] text-slate-500 truncate">{user.branch} • {user.year}</div>
+                        </div>
+                        <ChevronRight className="w-4 h-4 text-slate-300 group-hover:text-[#FF5A1F] transition-colors" />
+                      </button>
+                    ))}
+                  </div>
+                </form>
+              )}
+
+              {/* ════════════════ SIGN UP FORM ════════════════ */}
+              {mode === "signup" && (
+                <form onSubmit={handleSignup} className="space-y-4 animate-reveal-up">
+                  <div className="mb-2">
+                    <h2 className="text-xl font-bold text-[#121417]">Create your account ✨</h2>
+                    <p className="text-xs text-slate-500 mt-0.5">Join thousands of students trading on campus</p>
+                  </div>
+
+                  {/* ── Section: Personal Info ── */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF5A1F] flex items-center gap-1.5">
+                      <User className="w-3.5 h-3.5" /> Personal Details
+                    </p>
+
+                    <Field label="Full Name" icon={User} required>
+                      <input type="text" required value={signupData.name} onChange={updateSignup("name")}
+                        placeholder="e.g. Aryan Sharma" className={inputClass()} />
+                    </Field>
+
+                    <Field label="Email Address" icon={Mail} required>
+                      <input type="email" required value={signupData.email} onChange={updateSignup("email")}
+                        placeholder="your@gmail.com or college.ac.in" className={inputClass()} />
+                    </Field>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Password" icon={Lock} required>
+                        <input type={showPass ? "text" : "password"} required value={signupData.password} onChange={updateSignup("password")}
+                          placeholder="Min 6 chars" className={`${inputClass()} pr-9`} />
+                        <button type="button" onClick={() => setShowPass(s => !s)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                          {showPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </Field>
+                      <Field label="Confirm Password" icon={Lock} required>
+                        <input type={showConfirmPass ? "text" : "password"} required value={signupData.confirmPassword} onChange={updateSignup("confirmPassword")}
+                          placeholder="Re-enter" className={`${inputClass()} pr-9`} />
+                        <button type="button" onClick={() => setShowConfirmPass(s => !s)}
+                          className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400">
+                          {showConfirmPass ? <EyeOff className="w-3.5 h-3.5" /> : <Eye className="w-3.5 h-3.5" />}
+                        </button>
+                      </Field>
+                    </div>
+
+                    <Field label="Phone Number" icon={Phone}>
+                      <input type="tel" value={signupData.phone} onChange={updateSignup("phone")}
+                        placeholder="+91 98765 43210" className={inputClass()} />
+                    </Field>
+                  </div>
+
+                  {/* ── Section: Academic Info ── */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF5A1F] flex items-center gap-1.5">
+                      <GraduationCap className="w-3.5 h-3.5" /> Academic Details
+                    </p>
+
+                    <Field label="College / University" icon={Building2}>
+                      <input type="text" value={signupData.college} onChange={updateSignup("college")}
+                        placeholder="National Institute of Technology" className={inputClass()} />
+                    </Field>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Branch" icon={BookOpen}>
+                        <select value={signupData.branch} onChange={updateSignup("branch")}
+                          className={`${inputClass()} appearance-none cursor-pointer`}>
+                          <option value="">Select Branch</option>
+                          {branchOptions.map(b => <option key={b} value={b}>{b}</option>)}
+                        </select>
+                      </Field>
+                      <Field label="Year" icon={GraduationCap}>
+                        <select value={signupData.year} onChange={updateSignup("year")}
+                          className={`${inputClass()} appearance-none cursor-pointer`}>
+                          <option value="">Select Year</option>
+                          {yearOptions.map(y => <option key={y} value={y}>{y}</option>)}
+                        </select>
+                      </Field>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Semester" icon={Sparkles}>
+                        <select value={signupData.semester} onChange={updateSignup("semester")}
+                          className={`${inputClass()} appearance-none cursor-pointer`}>
+                          <option value="">Select Semester</option>
+                          {semesterOptions.map(s => <option key={s} value={s}>{s}</option>)}
+                        </select>
+                      </Field>
+                      <Field label="Roll Number" icon={BookOpen}>
+                        <input type="text" value={signupData.rollNo} onChange={updateSignup("rollNo")}
+                          placeholder="2024CS042" className={inputClass()} />
+                      </Field>
+                    </div>
+                  </div>
+
+                  {/* ── Section: Campus Address ── */}
+                  <div className="p-4 rounded-2xl bg-slate-50 border border-slate-100 space-y-3">
+                    <p className="text-[11px] font-extrabold uppercase tracking-widest text-[#FF5A1F] flex items-center gap-1.5">
+                      <Building2 className="w-3.5 h-3.5" /> Campus Address
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-3">
+                      <Field label="Hostel / PG Name" icon={Building2}>
+                        <input type="text" value={signupData.hostel} onChange={updateSignup("hostel")}
+                          placeholder="Hostel Block 3" className={inputClass()} />
+                      </Field>
+                      <Field label="Room No." icon={Building2}>
+                        <input type="text" value={signupData.roomNo} onChange={updateSignup("roomNo")}
+                          placeholder="Room 204" className={inputClass()} />
+                      </Field>
+                    </div>
+
+                    <div className="grid grid-cols-3 gap-2">
+                      <Field label="City" icon={null}>
+                        <input type="text" value={signupData.city} onChange={updateSignup("city")}
+                          placeholder="Pune" className={inputClass(false)} />
+                      </Field>
+                      <Field label="State" icon={null}>
+                        <input type="text" value={signupData.state} onChange={updateSignup("state")}
+                          placeholder="Maharashtra" className={inputClass(false)} />
+                      </Field>
+                      <Field label="Pincode" icon={null}>
+                        <input type="text" value={signupData.pincode} onChange={updateSignup("pincode")}
+                          placeholder="411038" className={inputClass(false)} />
+                      </Field>
+                    </div>
+                  </div>
+
+                  {/* Email verification hint */}
+                  <div className="flex items-start gap-2.5 p-3 rounded-xl bg-amber-50 border border-amber-200 text-amber-800 text-xs">
+                    <ShieldCheck className="w-4 h-4 text-amber-500 shrink-0 mt-0.5" />
+                    <span>
+                      Using an official <strong>.edu</strong> or <strong>.ac.in</strong> college email will automatically grant you the ✅ <strong>Verified Student</strong> badge.
+                    </span>
+                  </div>
+
+                  <button type="submit" disabled={loading}
+                    className="w-full py-3.5 rounded-xl bg-gradient-to-r from-[#FF5A1F] to-orange-500 text-white font-bold text-sm flex items-center justify-center gap-2 hover:opacity-90 active:scale-[0.98] transition-all disabled:opacity-60 shadow-lg shadow-orange-200">
+                    {loading ? <Loader2 className="w-5 h-5 animate-spin" /> : <Sparkles className="w-5 h-5" />}
+                    {loading ? "Creating Account..." : "Create My UNIMANDI Account"}
+                  </button>
+                </form>
+              )}
+            </div>
+          </div>
+
+          {/* ─── Trust badges ─── */}
+          <div className="mt-6 flex flex-wrap justify-center gap-4 text-slate-400 text-xs">
+            <span className="flex items-center gap-1.5"><ShieldCheck className="w-3.5 h-3.5" />Passwords encrypted with bcryptjs</span>
+            <span>•</span>
+            <span className="flex items-center gap-1.5">🔒 JWT session tokens</span>
+            <span>•</span>
+            <span className="flex items-center gap-1.5">⚡ Campus-only verified meetups</span>
+          </div>
+
+        </div>
+      </div>
+    </>
   );
 };

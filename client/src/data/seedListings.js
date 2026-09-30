@@ -188,6 +188,10 @@ export const CATEGORY_TREE = {
     subcategories: ["All Books", "Engineering Textbooks", "Handwritten Notes", "GATE / CAT Prep", "Solved PYQ Papers"],
     icon: "BookOpen"
   },
+  "Question Banks & Solutions": {
+    subcategories: ["Semester Finals (PYQ)", "Mid-Sem Solutions", "Lab Viva Questions", "Placement / Core Company Qs"],
+    icon: "FileText"
+  },
   "Electronics & Tech": {
     subcategories: ["All Electronics", "Scientific Calculators", "Laptops & Accessories", "Monitors & Keyboards", "Headphones & Audio"],
     icon: "Cpu"

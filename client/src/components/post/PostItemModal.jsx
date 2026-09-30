@@ -51,7 +51,7 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
   const [price, setPrice] = useState("");
   const [rentDuration, setRentDuration] = useState("per week");
   const [location, setLocation] = useState(currentUser?.pickupLocation || "SAC / Central Library");
-  
+
   // Real Uploaded Images State
   const [selectedImages, setSelectedImages] = useState([]);
   const [customImageUrl, setCustomImageUrl] = useState("");
@@ -152,43 +152,48 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
     setStep((prev) => Math.max(1, prev - 1));
   };
 
-  const handleSubmit = (e) => {
+  const handleSubmit = async (e) => {
     e.preventDefault();
     const effectiveCategory = category.includes("Other") && customCategory.trim() ? customCategory.trim() : category;
 
-    const created = addListing({
-      type,
-      category: effectiveCategory,
-      subcategory: category.includes("Other") && customCategory.trim() ? customCategory.trim() : "General",
-      title,
-      description,
-      condition,
-      price: Number(price),
-      rentDuration: type === "Rent" ? rentDuration : null,
-      location,
-      images: selectedImages.length > 0 ? selectedImages : [SAMPLE_CAMPUS_IMAGES[0].url],
-      targetBranch,
-      targetYear,
-      genderTarget: category === "Hostel & PG Living" ? genderTarget : "Any",
-      isUrgent,
-      isFeatured,
-    });
+    try {
+      const created = await addListing({
+        type,
+        category: effectiveCategory,
+        subcategory: category.includes("Other") && customCategory.trim() ? customCategory.trim() : "General",
+        title,
+        description,
+        condition,
+        price: Number(price),
+        rentDuration: type === "Rent" ? rentDuration : null,
+        location,
+        images: selectedImages.length > 0 ? selectedImages : [SAMPLE_CAMPUS_IMAGES[0].url],
+        targetBranch,
+        targetYear,
+        genderTarget: category === "Hostel & PG Living" ? genderTarget : "Any",
+        isUrgent,
+        isFeatured,
+      });
 
-    setIsSuccess(true);
-    setTimeout(() => {
-      setIsSuccess(false);
-      setStep(1);
-      onClose();
-      if (onPostSuccess) onPostSuccess(created);
-    }, 1500);
+      setIsSuccess(true);
+      setTimeout(() => {
+        setIsSuccess(false);
+        setStep(1);
+        onClose();
+        if (onPostSuccess) onPostSuccess(created);
+      }, 1500);
+    } catch (err) {
+      console.error("Failed to post listing:", err);
+      alert("Failed to post listing. Please try again.");
+    }
   };
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-sm">
-      
+
       {/* Modal Card */}
       <div className="relative w-full max-w-xl bg-white rounded-3xl shadow-modal border border-slate-200 overflow-hidden z-10 my-6 animate-reveal-up flex flex-col text-left">
-        
+
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-slate-200 bg-slate-50">
           <div>
@@ -222,9 +227,9 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
           </div>
         ) : (
           <form onSubmit={handleSubmit} className="flex-1 flex flex-col">
-            
+
             <div className="p-6 space-y-4 flex-1 overflow-y-auto max-h-[65vh]">
-              
+
               {/* STEP 1: Type & Category (With Other input option) */}
               {step === 1 && (
                 <div className="space-y-4 animate-reveal-up">
@@ -237,11 +242,10 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                       <button
                         type="button"
                         onClick={() => setType("Rent")}
-                        className={`p-4 rounded-2xl border text-left transition-all ${
-                          type === "Rent"
+                        className={`p-4 rounded-2xl border text-left transition-all ${type === "Rent"
                             ? "bg-orange-50 border-[#FF5A1F] text-[#121417] ring-2 ring-[#FF5A1F]/20"
                             : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600"
-                        }`}
+                          }`}
                       >
                         <span className="font-display font-bold text-base block text-[#121417]">
                           📦 Rent it Out
@@ -254,11 +258,10 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                       <button
                         type="button"
                         onClick={() => setType("Sell")}
-                        className={`p-4 rounded-2xl border text-left transition-all ${
-                          type === "Sell"
+                        className={`p-4 rounded-2xl border text-left transition-all ${type === "Sell"
                             ? "bg-[#121417] border-[#121417] text-white ring-2 ring-[#121417]/20"
                             : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600"
-                        }`}
+                          }`}
                       >
                         <span className={`font-display font-bold text-base block ${type === "Sell" ? "text-white" : "text-[#121417]"}`}>
                           🏷️ Sell Item
@@ -284,13 +287,12 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                             key={cat}
                             type="button"
                             onClick={() => setCategory(cat)}
-                            className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all flex items-center justify-between ${
-                              isSelected
+                            className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all flex items-center justify-between ${isSelected
                                 ? "bg-[#121417] text-white border-[#121417] shadow-sm scale-102"
                                 : isOther
-                                ? "bg-purple-50 text-purple-900 border-purple-200 hover:bg-purple-100"
-                                : "bg-slate-50 hover:bg-slate-100 text-[#121417] border-slate-200"
-                            }`}
+                                  ? "bg-purple-50 text-purple-900 border-purple-200 hover:bg-purple-100"
+                                  : "bg-slate-50 hover:bg-slate-100 text-[#121417] border-slate-200"
+                              }`}
                           >
                             <span>{cat}</span>
                             {isSelected && <Check className="w-3.5 h-3.5 text-[#FF5A1F]" />}
@@ -351,11 +353,10 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                           key={cond}
                           type="button"
                           onClick={() => setCondition(cond)}
-                          className={`py-2 px-3 rounded-xl border text-xs font-semibold text-center transition-colors ${
-                            condition === cond
+                          className={`py-2 px-3 rounded-xl border text-xs font-semibold text-center transition-colors ${condition === cond
                               ? "bg-[#121417] text-white border-[#121417]"
                               : "bg-slate-50 hover:bg-slate-100 text-[#121417] border-slate-200"
-                          }`}
+                            }`}
                         >
                           {cond}
                         </button>
@@ -379,15 +380,14 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                             key={g.id}
                             type="button"
                             onClick={() => setGenderTarget(g.id)}
-                            className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all ${
-                              genderTarget === g.id
+                            className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all ${genderTarget === g.id
                                 ? g.id === "Girls Only"
                                   ? "bg-rose-600 text-white border-rose-600 shadow-sm"
                                   : g.id === "Boys Only"
-                                  ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                                  : "bg-[#121417] text-white border-[#121417]"
+                                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                    : "bg-[#121417] text-white border-[#121417]"
                                 : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
-                            }`}
+                              }`}
                           >
                             {g.label}
                           </button>
@@ -443,11 +443,10 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                       onDragOver={handleDragOver}
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
-                      className={`p-6 sm:p-8 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-3 ${
-                        isDragging
+                      className={`p-6 sm:p-8 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-3 ${isDragging
                           ? "border-[#FF5A1F] bg-orange-50/80 scale-102"
                           : "border-slate-300 bg-slate-50 hover:bg-slate-100/80 hover:border-[#FF5A1F]/60"
-                      }`}
+                        }`}
                     >
                       <div className="w-14 h-14 rounded-2xl bg-orange-100 text-[#FF5A1F] flex items-center justify-center shadow-xs">
                         <Upload className="w-7 h-7" />
@@ -724,7 +723,7 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                       <span>₹{price} {type === "Rent" ? `(${rentDuration})` : ""}</span>
                     </div>
                     <p className="text-slate-500 line-clamp-2">{description || "No description"}</p>
-                    
+
                     {/* Photos Preview in Review */}
                     {selectedImages.length > 0 && (
                       <div className="flex gap-2 overflow-x-auto py-2">

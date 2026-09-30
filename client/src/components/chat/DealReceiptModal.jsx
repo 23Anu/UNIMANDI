@@ -31,21 +31,23 @@ export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating }) => {
   const discountAmount = originalPrice > finalPrice ? originalPrice - finalPrice : 0;
   const discountPercent = originalPrice > 0 ? Math.round((discountAmount / originalPrice) * 100) : 0;
 
-  const completedTime = chat.dealConfirmation?.completedAt 
+  const completedTime = chat.dealConfirmation?.completedAt
     ? new Date(chat.dealConfirmation.completedAt).toLocaleString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      })
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    })
     : new Date().toLocaleString("en-IN", {
-        day: "numeric",
-        month: "short",
-        year: "numeric",
-        hour: "2-digit",
-        minute: "2-digit"
-      });
+      day: "numeric",
+      month: "short",
+      year: "numeric",
+      hour: "2-digit",
+      minute: "2-digit"
+    });
+
+  const [isQrScanned, setIsQrScanned] = React.useState(false);
 
   const handleCopyPass = () => {
     navigator.clipboard.writeText(
@@ -55,10 +57,14 @@ export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating }) => {
     setTimeout(() => setCopied(false), 2500);
   };
 
+  const simulateQrScan = () => {
+    setIsQrScanned(true);
+  };
+
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/70 backdrop-blur-md animate-reveal-up">
-      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-modal border border-slate-200 overflow-hidden text-left">
-        
+      <div className="relative w-full max-w-md bg-white rounded-3xl shadow-modal border border-slate-200 overflow-hidden text-left transition-all duration-300">
+
         {/* Top Header */}
         <div className="p-5 bg-gradient-to-r from-emerald-600 via-teal-600 to-[#121417] text-white flex items-center justify-between">
           <div className="flex items-center gap-2.5">
@@ -82,117 +88,152 @@ export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating }) => {
           </button>
         </div>
 
-        {/* Content Body */}
+        {/* Dynamic Body: QR Scan vs Receipt */}
         <div className="p-5 space-y-4 text-xs">
-          
-          {/* Status Badge */}
-          <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 border border-emerald-500/30 text-emerald-900">
-            <div className="flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
-              <div>
-                <p className="font-bold text-xs">Deal Sealed & Confirmed</p>
-                <p className="text-[10px] text-emerald-700">Both parties verified the item on campus</p>
+
+          {!isQrScanned ? (
+            <div className="flex flex-col items-center justify-center py-6 text-center animate-scale-in">
+              <h3 className="font-bold text-lg text-slate-800 mb-1">Verify Campus Handover</h3>
+              <p className="text-slate-500 mb-6 text-xs max-w-[250px]">
+                Have the recipient scan this QR code to confirm checkout and release final receipt.
+              </p>
+
+              {/* Mock QR Code Pattern */}
+              <div
+                onClick={simulateQrScan}
+                className="cursor-pointer group relative bg-white p-4 rounded-3xl border-2 border-slate-200 shadow-sm hover:border-emerald-500 hover:shadow-emerald-500/20 transition-all duration-300"
+              >
+                <div className="grid grid-cols-5 gap-1.5 p-2 bg-slate-900 rounded-xl aspect-square w-48">
+                  {/* Simulated random QR blocks */}
+                  {[...Array(25)].map((_, i) => (
+                    <div key={i} className={`rounded-sm ${Math.random() > 0.3 ? 'bg-white' : 'bg-transparent'}`} />
+                  ))}
+                  {/* Corner anchors */}
+                  <div className="absolute top-6 left-6 w-8 h-8 border-4 border-white rounded-md bg-slate-900" />
+                  <div className="absolute top-6 right-6 w-8 h-8 border-4 border-white rounded-md bg-slate-900" />
+                  <div className="absolute bottom-6 left-6 w-8 h-8 border-4 border-white rounded-md bg-slate-900" />
+                </div>
+
+                {/* Scanner laser lines acting as call-to-action */}
+                <div className="absolute inset-0 rounded-3xl overflow-hidden pointer-events-none opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="laser-scanner-line" />
+                </div>
+                <div className="absolute -bottom-10 left-1/2 -translate-x-1/2 whitespace-nowrap opacity-0 group-hover:opacity-100 transition-all text-[10px] font-bold text-emerald-600">
+                  Click to simulate QR scan
+                </div>
               </div>
             </div>
-            <span className="font-mono text-[10px] font-extrabold bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
-              {dealId}
-            </span>
-          </div>
-
-          {/* Item details */}
-          <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
-            <span className="text-[10px] font-bold uppercase text-slate-400">Item Summary</span>
-            <div className="flex items-start justify-between gap-2">
-              <div>
-                <h4 className="font-bold text-sm text-[#121417] leading-tight line-clamp-2">
-                  {chat.listing?.title || "Campus Listing"}
-                </h4>
-                <p className="text-[11px] text-slate-500 mt-0.5">{chat.listing?.category || "Marketplace"}</p>
-              </div>
-              <div className="text-right shrink-0">
-                <span className="font-display font-black text-lg text-emerald-600 block">
-                  ₹{formatINR(finalPrice)}
+          ) : (
+            <div className="space-y-4 animate-reveal-up">
+              {/* Status Badge */}
+              <div className="flex items-center justify-between p-3 rounded-2xl bg-emerald-50 border border-emerald-500/30 text-emerald-900">
+                <div className="flex items-center gap-2">
+                  <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
+                  <div>
+                    <p className="font-bold text-xs">Payment & Handover Verified</p>
+                    <p className="text-[10px] text-emerald-700">Digital receipt generated successfully</p>
+                  </div>
+                </div>
+                <span className="font-mono text-[10px] font-extrabold bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
+                  {dealId}
                 </span>
+              </div>
+
+              {/* Item details */}
+              <div className="p-3.5 bg-slate-50 rounded-2xl border border-slate-200 space-y-2">
+                <span className="text-[10px] font-bold uppercase text-slate-400">Item Summary</span>
+                <div className="flex items-start justify-between gap-2">
+                  <div>
+                    <h4 className="font-bold text-sm text-[#121417] leading-tight line-clamp-2">
+                      {chat.listing?.title || "Campus Listing"}
+                    </h4>
+                    <p className="text-[11px] text-slate-500 mt-0.5">{chat.listing?.category || "Marketplace"}</p>
+                  </div>
+                  <div className="text-right shrink-0">
+                    <span className="font-display font-black text-lg text-emerald-600 block">
+                      ₹{formatINR(finalPrice)}
+                    </span>
+                    {discountAmount > 0 && (
+                      <span className="text-[10px] text-slate-400 line-through block">
+                        ₹{formatINR(originalPrice)}
+                      </span>
+                    )}
+                  </div>
+                </div>
+
                 {discountAmount > 0 && (
-                  <span className="text-[10px] text-slate-400 line-through block">
-                    ₹{formatINR(originalPrice)}
-                  </span>
+                  <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] font-semibold text-emerald-700">
+                    <span>Negotiated Savings:</span>
+                    <span>₹{formatINR(discountAmount)} ({discountPercent}% discount)</span>
+                  </div>
                 )}
               </div>
-            </div>
 
-            {discountAmount > 0 && (
-              <div className="pt-2 border-t border-slate-200 flex items-center justify-between text-[11px] font-semibold text-emerald-700">
-                <span>Negotiated Savings:</span>
-                <span>₹{formatINR(discountAmount)} ({discountPercent}% discount)</span>
+              {/* Verification Meta */}
+              <div className="grid grid-cols-2 gap-2.5">
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Campus Peer</span>
+                  <div className="flex items-center gap-1.5">
+                    <User className="w-3.5 h-3.5 text-slate-500" />
+                    <span className="font-bold text-slate-800 truncate">{chat.otherUser?.name || "Student"}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
+                    {chat.otherUser?.branch || "Campus Engineering"}
+                  </span>
+                </div>
+
+                <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
+                  <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Handoff Spot</span>
+                  <div className="flex items-center gap-1.5">
+                    <MapPin className="w-3.5 h-3.5 text-slate-500" />
+                    <span className="font-bold text-slate-800 truncate">{chat.listing?.location || "Campus Quad / SAC"}</span>
+                  </div>
+                  <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
+                    {completedTime}
+                  </span>
+                </div>
               </div>
-            )}
-          </div>
 
-          {/* Verification Meta */}
-          <div className="grid grid-cols-2 gap-2.5">
-            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
-              <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Campus Peer</span>
-              <div className="flex items-center gap-1.5">
-                <User className="w-3.5 h-3.5 text-slate-500" />
-                <span className="font-bold text-slate-800 truncate">{chat.otherUser?.name || "Student"}</span>
+              {/* Action Buttons */}
+              <div className="pt-2 space-y-2">
+                <button
+                  onClick={() => {
+                    onClose();
+                    if (onOpenRating) {
+                      onOpenRating({
+                        listingId: chat.listingId,
+                        targetUserId: chat.otherUser?.id,
+                        targetUserName: chat.otherUser?.name,
+                      });
+                    }
+                  }}
+                  className="w-full py-3 rounded-2xl bg-[#121417] hover:bg-black text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
+                >
+                  <Sparkles className="w-4 h-4 text-amber-400" />
+                  <span>Leave Campus Rating & Trust Review</span>
+                </button>
+
+                <button
+                  onClick={handleCopyPass}
+                  className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-200"
+                >
+                  {copied ? (
+                    <>
+                      <Check className="w-4 h-4 text-emerald-600" />
+                      <span className="text-emerald-700">Receipt Details Copied!</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy className="w-4 h-4 text-slate-500" />
+                      <span>Copy Final Receipt Text</span>
+                    </>
+                  )}
+                </button>
               </div>
-              <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
-                {chat.otherUser?.branch || "Campus Engineering"}
-              </span>
             </div>
-
-            <div className="p-3 bg-slate-50 rounded-2xl border border-slate-200">
-              <span className="text-[10px] font-bold uppercase text-slate-400 block mb-1">Handoff Spot</span>
-              <div className="flex items-center gap-1.5">
-                <MapPin className="w-3.5 h-3.5 text-slate-500" />
-                <span className="font-bold text-slate-800 truncate">{chat.listing?.location || "Campus Quad / SAC"}</span>
-              </div>
-              <span className="text-[10px] text-slate-500 font-medium block mt-0.5">
-                {completedTime}
-              </span>
-            </div>
-          </div>
-
-          {/* Action Buttons */}
-          <div className="pt-2 space-y-2">
-            <button
-              onClick={() => {
-                onClose();
-                if (onOpenRating) {
-                  onOpenRating({
-                    listingId: chat.listingId,
-                    targetUserId: chat.otherUser?.id,
-                    targetUserName: chat.otherUser?.name,
-                  });
-                }
-              }}
-              className="w-full py-3 rounded-2xl bg-[#121417] hover:bg-black text-white font-bold text-xs flex items-center justify-center gap-2 shadow-sm transition-all"
-            >
-              <Sparkles className="w-4 h-4 text-amber-400" />
-              <span>Leave Campus Rating & Trust Review</span>
-            </button>
-
-            <button
-              onClick={handleCopyPass}
-              className="w-full py-2.5 rounded-2xl bg-slate-100 hover:bg-slate-200 text-slate-700 font-bold text-xs flex items-center justify-center gap-2 transition-all border border-slate-200"
-            >
-              {copied ? (
-                <>
-                  <Check className="w-4 h-4 text-emerald-600" />
-                  <span className="text-emerald-700">Receipt Details Copied!</span>
-                </>
-              ) : (
-                <>
-                  <Copy className="w-4 h-4 text-slate-500" />
-                  <span>Copy Receipt Summary</span>
-                </>
-              )}
-            </button>
-          </div>
+          )}
 
         </div>
-
       </div>
     </div>
   );

@@ -47,10 +47,10 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
   const [inputMessage, setInputMessage] = useState("");
   const [showNegotiationModal, setShowNegotiationModal] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
-  
+
   const listingPrice = chat.listing?.price ? Number(chat.listing.price) : 0;
-  const currentProposed = (chat.activeOffer?.amount != null) 
-    ? Number(chat.activeOffer.amount) 
+  const currentProposed = (chat.activeOffer?.amount != null)
+    ? Number(chat.activeOffer.amount)
     : (listingPrice > 0 ? Math.round(listingPrice * 0.9) : 100);
 
   const [negotiatePrice, setNegotiatePrice] = useState(currentProposed);
@@ -60,7 +60,21 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
   const [showCounterInput, setShowCounterInput] = useState(false);
   const [counterNote, setCounterNote] = useState("");
 
+  const [isProcessingPayment, setIsProcessingPayment] = useState(false);
+  const [hasPaidLocally, setHasPaidLocally] = useState(false);
+
   const messagesEndRef = useRef(null);
+
+  const handleDummyPayment = () => {
+    setIsProcessingPayment(true);
+    // Simulate payment API call
+    setTimeout(() => {
+      setIsProcessingPayment(false);
+      setHasPaidLocally(true);
+      alert("✅ Test Dummy Payment Successful! Your Campus Pass is now unlocked.");
+      setShowReceiptModal(true);
+    }, 1500);
+  };
 
   const isBuyer = chat.buyerId === currentUserId;
   const isSeller = chat.sellerId === currentUserId;
@@ -127,7 +141,7 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
 
   return (
     <div className="flex flex-col h-full bg-[#FAFBFD] text-left min-w-0 overflow-hidden relative">
-      
+
       {/* 1. TOP HEADER: Peer Profile + Listing Info & Negotiate Trigger */}
       <div className="px-4 py-3 border-b border-slate-200 bg-white flex items-center justify-between shrink-0 gap-3 shadow-2xs">
         {/* Left: Peer Identity */}
@@ -200,7 +214,7 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
         <div className="flex items-center gap-2 min-w-0 flex-wrap">
           <span className="font-bold text-slate-400 uppercase text-[10px] tracking-wider">Status:</span>
           <StatusBadge status={chat.listing?.status || "Available"} />
-          
+
           {/* Final Agreed Price display */}
           {finalAgreedAmount != null ? (
             <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-lg bg-emerald-50 border border-emerald-500/40 text-emerald-800 font-bold text-xs animate-reveal-up">
@@ -237,11 +251,10 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
             <button
               onClick={handleDirectLockDeal}
               disabled={userConfirmed}
-              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs ${
-                userConfirmed
-                  ? "bg-emerald-50 text-emerald-700 border border-emerald-500/40 cursor-default"
-                  : "bg-[#121417] hover:bg-black text-white hover:scale-102 active:scale-95"
-              }`}
+              className={`px-3 py-1.5 rounded-xl text-xs font-bold transition-all flex items-center gap-1.5 shadow-xs ${userConfirmed
+                ? "bg-emerald-50 text-emerald-700 border border-emerald-500/40 cursor-default"
+                : "bg-[#121417] hover:bg-black text-white hover:scale-102 active:scale-95"
+                }`}
             >
               {userConfirmed ? (
                 <>
@@ -259,13 +272,39 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
             </button>
           ) : (
             <div className="flex items-center gap-1.5">
-              <button
-                onClick={() => setShowReceiptModal(true)}
-                className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 transition-all shadow-2xs"
-              >
-                <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
-                <span>Deal Receipt</span>
-              </button>
+              {/* Dummy Payment Test Step */}
+              {isBuyer ? (
+                chat.dealConfirmation?.isPaid || hasPaidLocally ? (
+                  <button
+                    onClick={() => setShowReceiptModal(true)}
+                    className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 transition-all shadow-2xs"
+                  >
+                    <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
+                    <span>View Campus Pass</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={handleDummyPayment}
+                    disabled={isProcessingPayment}
+                    className="px-3 py-1 rounded-xl text-xs font-bold bg-[#FF5A1F] hover:bg-[#E04F1A] text-white flex items-center gap-1.5 shadow-md transition-all active:scale-95 disabled:opacity-75"
+                  >
+                    {isProcessingPayment ? (
+                      <Clock className="w-3.5 h-3.5 animate-spin" />
+                    ) : (
+                      <DollarSign className="w-3.5 h-3.5" />
+                    )}
+                    <span>{isProcessingPayment ? "Processing..." : `Pay ₹${finalAgreedAmount || chat.listing?.price}`}</span>
+                  </button>
+                )
+              ) : (
+                <button
+                  onClick={() => setShowReceiptModal(true)}
+                  className="px-3 py-1 rounded-xl text-xs font-bold bg-emerald-50 hover:bg-emerald-100 text-emerald-800 border border-emerald-300 flex items-center gap-1.5 transition-all shadow-2xs"
+                >
+                  <FileCheck className="w-3.5 h-3.5 text-emerald-600" />
+                  <span>Deal Receipt</span>
+                </button>
+              )}
 
               <button
                 onClick={() =>
@@ -297,11 +336,10 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
             return (
               <div
                 key={msg.id || index}
-                className={`py-2.5 px-4 rounded-2xl text-center my-3 max-w-lg mx-auto shadow-2xs animate-reveal-up ${
-                  isCompletedSystem
-                    ? "bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-500/40 text-emerald-900"
-                    : "bg-slate-200/80 border border-slate-300/60 text-[#121417]"
-                }`}
+                className={`py-2.5 px-4 rounded-2xl text-center my-3 max-w-lg mx-auto shadow-2xs animate-reveal-up ${isCompletedSystem
+                  ? "bg-gradient-to-r from-emerald-50 via-teal-50 to-emerald-50 border border-emerald-500/40 text-emerald-900"
+                  : "bg-slate-200/80 border border-slate-300/60 text-[#121417]"
+                  }`}
               >
                 {isCompletedSystem && (
                   <div className="flex items-center justify-center gap-1.5 text-base mb-1">
@@ -334,11 +372,10 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
             return (
               <div
                 key={msg.id || index}
-                className={`my-3 p-4 sm:p-5 rounded-3xl border shadow-sm transition-all animate-bubble-in max-w-[90%] sm:max-w-[75%] ${
-                  isMe
-                    ? "bg-gradient-to-br from-orange-50/90 to-amber-50/60 border-[#FF5A1F]/30 ml-auto"
-                    : "bg-white border-slate-200 mr-auto hover:border-slate-300"
-                }`}
+                className={`my-3 p-4 sm:p-5 rounded-3xl border shadow-sm transition-all animate-bubble-in max-w-[90%] sm:max-w-[75%] ${isMe
+                  ? "bg-gradient-to-br from-orange-50/90 to-amber-50/60 border-[#FF5A1F]/30 ml-auto"
+                  : "bg-white border-slate-200 mr-auto hover:border-slate-300"
+                  }`}
               >
                 {/* Offer Header */}
                 <div className="flex items-center justify-between gap-2 border-b border-slate-100 pb-2.5 mb-2.5">
@@ -445,11 +482,10 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
               className={`flex flex-col animate-bubble-in ${isMe ? "items-end" : "items-start"}`}
             >
               <div
-                className={`max-w-[85%] sm:max-w-[72%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed transition-all hover:shadow-sm ${
-                  isMe
-                    ? "bg-[#121417] text-white rounded-br-sm shadow-xs"
-                    : "bg-white text-[#121417] rounded-bl-sm border border-slate-200/90 shadow-2xs"
-                }`}
+                className={`max-w-[85%] sm:max-w-[72%] px-4 py-2.5 rounded-2xl text-xs sm:text-sm leading-relaxed transition-all hover:shadow-sm ${isMe
+                  ? "bg-[#121417] text-white rounded-br-sm shadow-xs"
+                  : "bg-white text-[#121417] rounded-bl-sm border border-slate-200/90 shadow-2xs"
+                  }`}
               >
                 {msg.text}
               </div>
@@ -505,11 +541,10 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
         <button
           type="submit"
           disabled={!inputMessage.trim()}
-          className={`w-11 h-11 rounded-2xl transition-all flex items-center justify-center shrink-0 shadow-sm ${
-            inputMessage.trim()
-              ? "bg-[#FF5A1F] hover:bg-[#E04F1A] text-white hover:scale-105 active:scale-95"
-              : "bg-slate-200 text-slate-400 cursor-not-allowed opacity-50"
-          }`}
+          className={`w-11 h-11 rounded-2xl transition-all flex items-center justify-center shrink-0 shadow-sm ${inputMessage.trim()
+            ? "bg-[#FF5A1F] hover:bg-[#E04F1A] text-white hover:scale-105 active:scale-95"
+            : "bg-slate-200 text-slate-400 cursor-not-allowed opacity-50"
+            }`}
           title="Send Message"
         >
           <Send className="w-4 h-4" />
@@ -521,7 +556,7 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
       {showNegotiationModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-4 bg-black/65 backdrop-blur-sm animate-reveal-up">
           <div className="bg-white rounded-3xl p-5 sm:p-6 max-w-md w-full border border-slate-200 shadow-modal text-left space-y-4 max-h-[92vh] overflow-y-auto">
-            
+
             {/* Modal Header */}
             <div className="flex items-center justify-between border-b border-slate-100 pb-3">
               <div className="flex items-center gap-2">
@@ -644,11 +679,10 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
                         key={pct}
                         type="button"
                         onClick={() => setNegotiatePrice(val)}
-                        className={`py-1.5 px-1 rounded-xl text-[11px] font-bold transition-all border ${
-                          isCurrent
-                            ? "bg-[#FF5A1F] text-white border-[#FF5A1F] shadow-2xs"
-                            : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
-                        }`}
+                        className={`py-1.5 px-1 rounded-xl text-[11px] font-bold transition-all border ${isCurrent
+                          ? "bg-[#FF5A1F] text-white border-[#FF5A1F] shadow-2xs"
+                          : "bg-slate-100 hover:bg-slate-200 text-slate-700 border-slate-200"
+                          }`}
                       >
                         ₹{formatINR(val)} ({Math.round((1 - pct) * 100)}% off)
                       </button>

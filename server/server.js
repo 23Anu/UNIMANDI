@@ -89,9 +89,13 @@ app.use("/api/safety", safetyRoutes);
 app.use("/api/store", storeRoutes);
 app.use("/api/upload", uploadRoutes);
 
-// Catch-all 404 for undefined routes
-app.use((req, res) => {
-  res.status(404).json({ error: `Route not found: ${req.method} ${req.url}` });
+// Serve Frontend client (Production unified setup)
+const clientBuildPath = path.join(__dirname, "../client/dist");
+app.use(express.static(clientBuildPath));
+
+// Catch-all route to serve React app for unresolved routes (Client-side routing)
+app.get("*", (req, res) => {
+  res.sendFile(path.join(clientBuildPath, "index.html"));
 });
 
 // Error handling middleware

@@ -29,7 +29,7 @@ export const ItemDetailModal = ({
 }) => {
   const { currentUser } = useAuth();
   const { startChat, makeOffer } = useChat();
-  const { updateListingStatus } = useListings();
+  const { updateListingStatus, deleteListing } = useListings();
   const [activeImageIndex, setActiveImageIndex] = useState(0);
 
   // OLX Make an Offer State
@@ -69,7 +69,7 @@ export const ItemDetailModal = ({
         title: listing.title,
         text: `Check out ${listing.title} on UniMandi Campus Marketplace!`,
         url: window.location.href,
-      }).catch(() => {});
+      }).catch(() => { });
     } else {
       navigator.clipboard.writeText(window.location.href);
       alert("Listing link copied to clipboard!");
@@ -78,10 +78,10 @@ export const ItemDetailModal = ({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-3 sm:p-6 overflow-y-auto bg-black/60 backdrop-blur-sm">
-      
+
       {/* Modal Dialog */}
       <div className="relative w-full max-w-2xl bg-white rounded-3xl shadow-modal border border-slate-200 overflow-hidden z-10 my-6 animate-reveal-up max-h-[92vh] flex flex-col text-left">
-        
+
         {/* Sticky Header */}
         <div className="flex items-center justify-between px-6 py-3.5 border-b border-slate-200 bg-white/90 backdrop-blur-sm shrink-0">
           <div className="flex items-center gap-2 flex-wrap">
@@ -119,7 +119,7 @@ export const ItemDetailModal = ({
 
         {/* Scrollable Modal Content */}
         <div className="overflow-y-auto p-6 space-y-6">
-          
+
           {/* Photo Showcase Carousel */}
           <div className="space-y-2">
             <div className="relative aspect-[16/10] w-full rounded-2xl overflow-hidden bg-slate-100 border border-slate-200">
@@ -174,11 +174,10 @@ export const ItemDetailModal = ({
                   <button
                     key={idx}
                     onClick={() => setActiveImageIndex(idx)}
-                    className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${
-                      activeImageIndex === idx
-                        ? "border-[#FF5A1F] scale-105"
-                        : "border-slate-200 opacity-60 hover:opacity-100"
-                    }`}
+                    className={`w-16 h-16 rounded-xl overflow-hidden border-2 transition-all ${activeImageIndex === idx
+                      ? "border-[#FF5A1F] scale-105"
+                      : "border-slate-200 opacity-60 hover:opacity-100"
+                      }`}
                   >
                     <img src={img} alt="" className="w-full h-full object-cover" />
                   </button>
@@ -300,13 +299,12 @@ export const ItemDetailModal = ({
                 <span className="text-slate-400 block text-[10px] uppercase font-bold tracking-wider">
                   Hostel / PG Gender
                 </span>
-                <span className={`font-bold text-xs inline-flex items-center gap-1 px-2 py-0.5 rounded-md mt-0.5 ${
-                  listing.genderTarget === "Girls Only"
-                    ? "bg-rose-50 text-rose-700 border border-rose-200"
-                    : listing.genderTarget === "Boys Only"
+                <span className={`font-bold text-xs inline-flex items-center gap-1 px-2 py-0.5 rounded-md mt-0.5 ${listing.genderTarget === "Girls Only"
+                  ? "bg-rose-50 text-rose-700 border border-rose-200"
+                  : listing.genderTarget === "Boys Only"
                     ? "bg-blue-50 text-blue-700 border border-blue-200"
                     : "bg-purple-50 text-purple-700 border border-purple-200"
-                }`}>
+                  }`}>
                   {listing.genderTarget === "Girls Only" ? "🌸 Girls Only" : listing.genderTarget === "Boys Only" ? "🔷 Boys Only" : "👥 Co-ed / Any"}
                 </span>
               </div>
@@ -341,20 +339,32 @@ export const ItemDetailModal = ({
 
           {/* Owner Status Management */}
           {isOwner && (
-            <div className="p-4 rounded-2xl bg-slate-100 border border-slate-200">
-              <h4 className="text-xs font-bold text-[#121417] uppercase tracking-wider mb-2">
-                Manage Your Post Status
-              </h4>
+            <div className="p-4 rounded-2xl bg-slate-100 border border-slate-200 space-y-3">
+              <div className="flex items-center justify-between">
+                <h4 className="text-xs font-bold text-[#121417] uppercase tracking-wider">
+                  Manage Your Post Status
+                </h4>
+                <button
+                  onClick={() => {
+                    if (window.confirm(`Are you sure you want to permanently delete "${listing.title}"?`)) {
+                      deleteListing(listing.id);
+                      onClose();
+                    }
+                  }}
+                  className="text-[11px] font-bold text-rose-600 hover:text-rose-700 bg-rose-50 hover:bg-rose-100 px-2 py-1 rounded transition-colors"
+                >
+                  Delete Listing
+                </button>
+              </div>
               <div className="flex flex-wrap gap-2">
                 {["Available", "Reserved", "Sold", "Rented Out"].map((st) => (
                   <button
                     key={st}
                     onClick={() => updateListingStatus(listing.id, st)}
-                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${
-                      listing.status === st
-                        ? "bg-[#121417] text-white border-[#121417]"
-                        : "bg-white hover:bg-slate-200 text-[#121417] border-slate-300"
-                    }`}
+                    className={`px-3 py-1.5 rounded-xl text-xs font-semibold border transition-colors ${listing.status === st
+                      ? "bg-[#121417] text-white border-[#121417]"
+                      : "bg-white hover:bg-slate-200 text-[#121417] border-slate-300"
+                      }`}
                   >
                     Mark {st}
                   </button>

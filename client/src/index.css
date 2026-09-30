@@ -21,7 +21,12 @@
     letter-spacing: -0.01em;
   }
 
-  h1, h2, h3, h4, .font-heading, .font-serif {
+  h1,
+  h2,
+  h3,
+  h4,
+  .font-heading,
+  .font-serif {
     font-family: 'Outfit', 'Plus Jakarta Sans', sans-serif;
     letter-spacing: -0.025em;
   }
@@ -32,73 +37,199 @@
   width: 5px;
   height: 5px;
 }
+
 ::-webkit-scrollbar-track {
   background: transparent;
 }
+
 ::-webkit-scrollbar-thumb {
   background: #CBD5E1;
   border-radius: 9999px;
 }
+
 ::-webkit-scrollbar-thumb:hover {
   background: #94A3B8;
 }
 
 /* Keyframes */
 @keyframes bubbleIn {
-  0% { opacity: 0; transform: translateY(12px) scale(0.95); }
-  100% { opacity: 1; transform: translateY(0) scale(1); }
+  0% {
+    opacity: 0;
+    transform: translateY(12px) scale(0.95);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
 }
 
 @keyframes scaleIn {
-  0% { opacity: 0; transform: scale(0.92); }
-  100% { opacity: 1; transform: scale(1); }
+  0% {
+    opacity: 0;
+    transform: scale(0.92);
+  }
+
+  100% {
+    opacity: 1;
+    transform: scale(1);
+  }
 }
 
 @keyframes revealUp {
-  0% { opacity: 0; transform: translateY(14px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+
+  100% {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
 
 @keyframes scannerLaser {
-  0% { top: 0%; opacity: 0.8; }
-  50% { top: 92%; opacity: 1; }
-  100% { top: 0%; opacity: 0.8; }
+  0% {
+    top: 0%;
+    opacity: 0.8;
+  }
+
+  50% {
+    top: 92%;
+    opacity: 1;
+  }
+
+  100% {
+    top: 0%;
+    opacity: 0.8;
+  }
 }
 
 @keyframes heartPop {
-  0% { transform: scale(1); }
-  40% { transform: scale(1.35) rotate(-12deg); }
-  70% { transform: scale(0.9) rotate(8deg); }
-  100% { transform: scale(1) rotate(0deg); }
+  0% {
+    transform: scale(1);
+  }
+
+  40% {
+    transform: scale(1.35) rotate(-12deg);
+  }
+
+  70% {
+    transform: scale(0.9) rotate(8deg);
+  }
+
+  100% {
+    transform: scale(1) rotate(0deg);
+  }
 }
 
 @keyframes floatParticle {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(-10px) rotate(3deg); }
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(-10px) rotate(3deg);
+  }
 }
 
 @keyframes floatParticleReverse {
-  0%, 100% { transform: translateY(0px) rotate(0deg); }
-  50% { transform: translateY(10px) rotate(-3deg); }
+
+  0%,
+  100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+
+  50% {
+    transform: translateY(10px) rotate(-3deg);
+  }
 }
 
 @keyframes pulseGlow {
-  0%, 100% { transform: scale(1); opacity: 0.8; }
-  50% { transform: scale(1.08); opacity: 1; filter: drop-shadow(0 0 12px rgba(255, 90, 31, 0.45)); }
+
+  0%,
+  100% {
+    transform: scale(1);
+    opacity: 0.8;
+  }
+
+  50% {
+    transform: scale(1.08);
+    opacity: 1;
+    filter: drop-shadow(0 0 12px rgba(255, 90, 31, 0.45));
+  }
 }
 
 @keyframes shineSweep {
-  0% { transform: translateX(-120%) skewX(-20deg); }
-  100% { transform: translateX(220%) skewX(-20deg); }
+  0% {
+    transform: translateX(-120%) skewX(-20deg);
+  }
+
+  100% {
+    transform: translateX(220%) skewX(-20deg);
+  }
+}
+
+@keyframes scanLaser {
+  0% {
+    transform: translateY(-100%);
+  }
+
+  50% {
+    transform: translateY(300%);
+    box-shadow: 0 0 15px 3px rgba(16, 185, 129, 0.6);
+    opacity: 1;
+  }
+
+  100% {
+    transform: translateY(-100%);
+    opacity: 0;
+  }
+}
+
+/* Global Animations */
+.animate-reveal-up {
+  animation: revealUp 0.35s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-scale-in {
+  animation: scaleIn 0.25s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+.animate-float {
+  animation: floatParticle 4s ease-in-out infinite;
+}
+
+.animate-shine {
+  animation: shineSweep 1.8s ease-in-out infinite;
+}
+
+.animate-pulse-glow {
+  animation: pulseGlow 2.5s ease-in-out infinite;
+}
+
+.laser-scanner-line {
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 2px;
+  background-color: #10B981;
+  animation: scanLaser 2s linear infinite;
+  box-shadow: 0 0 10px 2px rgba(16, 185, 129, 0.5);
 }
 
 /* Status Badges */
 .badge-available {
   @apply bg-emerald-50 text-emerald-700 border border-emerald-500/30 px-2.5 py-0.5 rounded-full font-semibold text-xs flex items-center gap-1.5 transition-all duration-200 hover:bg-emerald-100;
 }
+
 .badge-reserved {
   @apply bg-amber-50 text-amber-700 border border-amber-500/30 px-2.5 py-0.5 rounded-full font-semibold text-xs flex items-center gap-1.5 transition-all duration-200 hover:bg-amber-100;
 }
+
 .badge-sold {
   @apply bg-slate-100 text-slate-700 border border-slate-300 px-2.5 py-0.5 rounded-full font-semibold text-xs flex items-center gap-1.5;
 }
@@ -107,9 +238,11 @@
 .btn-primary {
   @apply bg-[#FF5A1F] hover:bg-[#E04812] text-white font-bold px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 shadow-sm hover:shadow-md hover:-translate-y-0.5 flex items-center justify-center gap-2 tracking-tight;
 }
+
 .btn-secondary {
   @apply bg-white hover:bg-slate-100 text-[#121417] font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 border border-slate-200 shadow-sm hover:shadow hover:-translate-y-0.5 flex items-center justify-center gap-2;
 }
+
 .btn-outline {
   @apply border border-slate-300 hover:border-[#121417] hover:bg-white text-[#121417] font-semibold px-4 py-2.5 rounded-xl transition-all duration-200 active:scale-95 flex items-center justify-center gap-2;
 }
@@ -168,8 +301,3 @@
   padding: 2px;
   border-radius: 1.5rem;
 }
-
-
-
-
-

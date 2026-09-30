@@ -1,6 +1,76 @@
 {
   "users": [
     {
+      "id": "user_1789961086092",
+      "name": "Aryan Sharma",
+      "email": "aryansharma@gmail.com",
+      "password": "$2b$12$QPjTMSYK1idNpekpFs0o6ejLxV0rXGxqJPcbwaA5ZjajKNWc7EuWe",
+      "phone": "987654321",
+      "college": "NMIET",
+      "branch": "Information Technology",
+      "year": "2nd Year",
+      "semester": "3rd Semester",
+      "rollNo": "2541879622",
+      "addressType": "Campus Hostel / Dorm",
+      "roomNo": "",
+      "buildingName": "",
+      "streetArea": "",
+      "landmark": "",
+      "city": "Pune",
+      "state": "Maharashtra",
+      "pincode": "411038",
+      "pickupLocation": "",
+      "fullAddress": "",
+      "hostel": "",
+      "role": "student",
+      "isVerified": false,
+      "isEmailVerified": false,
+      "isPhoneVerified": false,
+      "isAddressVerified": false,
+      "avatar": "https://ui-avatars.com/api/?name=Aryan%20Sharma&background=FF5A1F&color=fff&size=150",
+      "trustScore": 5,
+      "dealsCount": 0,
+      "isProfileComplete": true,
+      "createdAt": "2026-09-21T03:24:46.092Z",
+      "resetToken": null,
+      "resetTokenExpiry": null
+    },
+    {
+      "id": "user_1789797833120",
+      "name": "Test Student",
+      "email": "test@gmail.com",
+      "password": "$2b$12$YIQ/TW1NUMru28kp0Ja.B.e04XvP9/A6Tgz1E0pd3EyyuTzMUQ5Zm",
+      "phone": "",
+      "college": "NIT",
+      "branch": "Computer Engineering",
+      "year": "2nd Year",
+      "semester": "3rd Semester",
+      "rollNo": "2024CS001",
+      "addressType": "Campus Hostel / Dorm",
+      "roomNo": "",
+      "buildingName": "",
+      "streetArea": "",
+      "landmark": "",
+      "city": "Pune",
+      "state": "Maharashtra",
+      "pincode": "411038",
+      "pickupLocation": "",
+      "fullAddress": "",
+      "hostel": "",
+      "role": "student",
+      "isVerified": false,
+      "isEmailVerified": false,
+      "isPhoneVerified": false,
+      "isAddressVerified": false,
+      "avatar": "https://ui-avatars.com/api/?name=Test%20Student&background=FF5A1F&color=fff&size=150",
+      "trustScore": 5,
+      "dealsCount": 0,
+      "isProfileComplete": true,
+      "createdAt": "2026-09-19T06:03:53.121Z",
+      "resetToken": "297370",
+      "resetTokenExpiry": "2026-09-19T06:23:34.447Z"
+    },
+    {
       "id": "user_1789302530250",
       "name": "Anuj",
       "email": "anujpatil.work@outlook.com",
@@ -161,6 +231,29 @@
   ],
   "listings": [
     {
+      "id": "item_1789961418608",
+      "userId": "user_1789961086092",
+      "type": "Sell",
+      "category": "Electronics & Tech",
+      "subcategory": "General",
+      "title": "Alchemists",
+      "description": "Its and new edition",
+      "condition": "Good",
+      "price": 1025,
+      "rentDuration": null,
+      "location": "SAC / Central Library",
+      "status": "Rented Out",
+      "genderTarget": "Any",
+      "images": [
+        "https://images.unsplash.com/photo-1544716278-ca5e3f4abd8c?w=600&auto=format&fit=crop&q=80"
+      ],
+      "targetBranch": "All Branches",
+      "targetYear": "All Years",
+      "views": 0,
+      "createdAt": "2026-09-21T03:30:18.608Z",
+      "updatedAt": "2026-09-21T03:43:30.486Z"
+    },
+    {
       "id": "item_101",
       "userId": "user_1",
       "type": "Rent",
@@ -284,7 +377,7 @@
       "price": 650,
       "originalPrice": 850,
       "inStock": true,
-      "stockCount": 44,
+      "stockCount": 43,
       "unit": "kit",
       "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80",
       "description": "Official NIT approved mini drafter with steel rod, clamp, drafting scales, protractor, and water-resistant storage bag.",
@@ -331,6 +424,33 @@
     }
   ],
   "orders": [
+    {
+      "id": "ord_1789961173231",
+      "pickupCode": "UM-206995",
+      "studentId": "user_1789961086092",
+      "studentName": "Aryan Sharma",
+      "studentRoll": "2541879622",
+      "studentBranch": "Information Technology",
+      "items": [
+        {
+          "productId": "tn_prod_1",
+          "name": "Complete Engineering Drawing Kit (Mini Drafter + Compass + Clips + Sheet Holder)",
+          "price": 650,
+          "unit": "kit",
+          "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=600&auto=format&fit=crop&q=80",
+          "quantity": 1
+        }
+      ],
+      "totalAmount": 650,
+      "status": "Ready for Pickup",
+      "placedAt": "2026-09-21T03:26:13.231Z",
+      "pickupSlot": "Today, Counter Pickup (SAC Counter #2)",
+      "pickupLocation": "UniMandi SAC Central Store Counter #2",
+      "qrDataPayload": "UNIMANDI-SAC-206995-user_1789961086092-1789961173231",
+      "paymentMethod": "Prepaid Student Card",
+      "paymentId": "order_sim_1789961173216",
+      "paymentStatus": "Paid & Verified"
+    },
     {
       "id": "ord_1789399222090",
       "pickupCode": "UM-715463",
@@ -384,6 +504,71 @@
     }
   ],
   "chats": [
+    {
+      "id": "chat_1789753264237",
+      "listingId": "item_104",
+      "buyerId": "user_1789302530250",
+      "sellerId": "user_3",
+      "activeOffer": {
+        "amount": 5850,
+        "offeredBy": "user_1789302530250",
+        "status": "pending",
+        "counterAmount": null,
+        "isFinalPrice": false,
+        "note": ""
+      },
+      "dealConfirmation": {
+        "buyerConfirmed": false,
+        "sellerConfirmed": false,
+        "completedAt": null
+      },
+      "messages": [
+        {
+          "id": "msg_1789753264238",
+          "senderId": "user_1789302530250",
+          "type": "text",
+          "text": "Hi! I am interested in your \"Spacious AC Single Room in Verified Girls PG (Near Gate 2)\". Is it still available?",
+          "timestamp": "2026-09-18T17:41:04.238Z"
+        },
+        {
+          "id": "msg_1789753526112_e08f2b",
+          "senderId": "user_1789302530250",
+          "text": "Is this still available?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-18T17:45:26.118Z"
+        },
+        {
+          "id": "msg_1789753550248_wxifyp",
+          "senderId": "user_1789302530250",
+          "text": "Can we meet near SAC / Library?",
+          "type": "text",
+          "offerAmount": null,
+          "timestamp": "2026-09-18T17:45:50.249Z"
+        },
+        {
+          "id": "msg_offer_1789923842666_sdce",
+          "senderId": "user_1789302530250",
+          "type": "offer",
+          "offerAmount": 5850,
+          "isFinalPrice": false,
+          "note": "",
+          "text": "🤝 Proposed Offer: ₹5,850",
+          "timestamp": "2026-09-20T17:04:02.666Z"
+        },
+        {
+          "id": "msg_offer_1789923842737_8mcu",
+          "senderId": "user_1789302530250",
+          "type": "offer",
+          "offerAmount": 5850,
+          "isFinalPrice": false,
+          "note": "",
+          "text": "🤝 Proposed Offer: ₹5,850",
+          "timestamp": "2026-09-20T17:04:02.737Z"
+        }
+      ],
+      "updatedAt": "2026-09-20T17:04:02.737Z"
+    },
     {
       "id": "chat_1789484223197",
       "listingId": "item_102",

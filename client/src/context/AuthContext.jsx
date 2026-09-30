@@ -54,13 +54,13 @@ export const AuthProvider = ({ children }) => {
         sessionStorage.removeItem("rentify_session_user");
         setNeedsProfileSetup(false);
       }
-    } catch (e) {}
+    } catch (e) { }
   }, [currentUser]);
 
   useEffect(() => {
     try {
       localStorage.setItem("rentify_registered_users", JSON.stringify(registeredUsers));
-    } catch (e) {}
+    } catch (e) { }
   }, [registeredUsers]);
 
   // Google OAuth Login
@@ -148,6 +148,31 @@ export const AuthProvider = ({ children }) => {
       console.error("College email login error:", err);
       throw err;
     }
+  };
+
+  // ── Credential-based Register (Sign Up) ─────────────────────────────────────
+  const registerUser = async (formData) => {
+    const res = await authApi.register(formData);
+    if (res.token) localStorage.setItem("rentify_auth_token", res.token);
+    const user = res.user;
+    setCurrentUser(user);
+    setNeedsProfileSetup(!user.isProfileComplete);
+    setRegisteredUsers((prev) => [user, ...prev]);
+    return user;
+  };
+
+  // ── Credential-based Login ───────────────────────────────────────────────────
+  const loginWithCredentials = async (email, password) => {
+    const res = await authApi.login(email, password);
+    if (res.token) localStorage.setItem("rentify_auth_token", res.token);
+    const user = res.user;
+    setCurrentUser(user);
+    setNeedsProfileSetup(!user.isProfileComplete);
+    setRegisteredUsers((prev) => {
+      const exists = prev.some((u) => u.id === user.id);
+      return exists ? prev.map((u) => (u.id === user.id ? user : u)) : [user, ...prev];
+    });
+    return user;
   };
 
   // Complete Onboarding Profile
@@ -242,6 +267,10 @@ export const AuthProvider = ({ children }) => {
         availableUsers: registeredUsers,
         needsProfileSetup,
         setNeedsProfileSetup,
+        // Credential-based
+        registerUser,
+        loginWithCredentials,
+        // Legacy / social
         loginWithGoogle,
         loginWithPhone,
         loginWithCollegeEmail,
@@ -250,6 +279,9 @@ export const AuthProvider = ({ children }) => {
         updateProfile,
         completeFullProfile,
         verifyCollegeEmail,
+        // Forgot / reset password helpers (forward to API directly)
+        forgotPassword: (email) => authApi.forgotPassword(email),
+        resetPassword: (email, token, newPassword) => authApi.resetPassword(email, token, newPassword),
       }}
     >
       {children}
