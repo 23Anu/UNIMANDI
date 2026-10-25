@@ -2,10 +2,19 @@ import { io } from "socket.io-client";
 
 let socketInstance = null;
 
+const resolveSocketUrl = () => {
+  if (import.meta.env.VITE_SOCKET_URL) return import.meta.env.VITE_SOCKET_URL;
+
+  if (window.location.hostname === "localhost" || window.location.hostname === "127.0.0.1") {
+    return "http://localhost:5000";
+  }
+
+  return window.location.origin;
+};
+
 export const getSocket = () => {
   if (!socketInstance) {
-    // In dev, Vite proxies /api to port 5000; in prod use VITE_SOCKET_URL or current host
-    const socketUrl = import.meta.env.VITE_SOCKET_URL || window.location.origin;
+    const socketUrl = resolveSocketUrl();
 
     socketInstance = io(socketUrl, {
       transports: ["websocket", "polling"],
@@ -16,6 +25,10 @@ export const getSocket = () => {
 
     socketInstance.on("connect", () => {
       console.log("⚡ Live WebSockets Connected! Socket ID:", socketInstance.id);
+    });
+
+    socketInstance.on("connect_error", (error) => {
+      console.warn("Socket connection error:", error?.message || error);
     });
 
     socketInstance.on("disconnect", (reason) => {

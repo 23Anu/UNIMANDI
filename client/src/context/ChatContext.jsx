@@ -96,6 +96,39 @@ const SEED_CHATS = [
   }
 ];
 
+const mergeIncomingChatMessage = (existingChats, chatId, message, chatPayload) => {
+  const nextChats = [...existingChats];
+  const index = nextChats.findIndex((c) => c.id === chatId);
+
+  if (index === -1) {
+    return chatPayload ? [chatPayload, ...nextChats] : nextChats;
+  }
+
+  const current = nextChats[index] || {};
+  const currentMessages = Array.isArray(current.messages) ? current.messages : [];
+  const isDuplicate = currentMessages.some(
+    (m) =>
+      m.id === message?.id ||
+      (m.senderId === message?.senderId &&
+        m.text === message?.text &&
+        Math.abs(new Date(m.timestamp || 0).getTime() - new Date(message?.timestamp || 0).getTime()) < 4000)
+  );
+
+  if (isDuplicate) {
+    return nextChats;
+  }
+
+  const mergedChat = {
+    ...current,
+    ...(chatPayload || {}),
+    messages: [...currentMessages, message],
+    updatedAt: message?.timestamp || new Date().toISOString(),
+  };
+
+  nextChats.splice(index, 1, mergedChat);
+  return nextChats;
+};
+
 export const ChatProvider = ({ children }) => {
   const { currentUser, registeredUsers } = useAuth();
   const { listings, updateListingStatus } = useListings();
@@ -120,7 +153,7 @@ export const ChatProvider = ({ children }) => {
     if (!currentUser) return;
     try {
       const res = await chatApi.getUserChats(currentUser.id);
-      if (res.chats && res.chats.length > 0) {
+      if (res?.chats && res.chats.length > 0) {
         setChats(res.chats);
       }
     } catch (err) {
@@ -138,68 +171,39 @@ export const ChatProvider = ({ children }) => {
 
     // 1. Live Message Listener with strict deduplication
     const handleNewMessage = ({ chatId, message, chat: updatedChat }) => {
-      setChats((prev) => {
-        const chatIndex = prev.findIndex((c) => c.id === chatId);
-        if (chatIndex === -1) {
-          return updatedChat ? [updatedChat, ...prev] : prev;
-        }
-
-        const currentChat = prev[chatIndex];
-        const msgExists = currentChat.messages.some(
-          (m) =>
-            m.id === message.id ||
-            (m.senderId === message.senderId &&
-              m.text === message.text &&
-              Math.abs(new Date(m.timestamp).getTime() - new Date(message.timestamp).getTime()) < 3500)
-        );
-
-        if (msgExists) return prev;
-
-        const updated = {
-          ...currentChat,
-          messages: [...currentChat.messages, message],
-          updatedAt: message.timestamp,
-        };
-
-        const remaining = prev.filter((c) => c.id !== chatId);
-        return [updated, ...remaining];
-      });
+      setChats((prev) => mergeIncomingChatMessage(prev, chatId, message, updatedChat));
     };
 
     // 2. Live Offer Listener
     const handleOfferUpdated = ({ chatId, activeOffer, message, chat: updatedChat, finalAmount }) => {
       setChats((prev) => {
-        return prev.map((c) => {
-          if (c.id === chatId) {
-            const hasMsg = message ? c.messages.some((m) => m.id === message.id) : true;
-            return {
-              ...c,
-              activeOffer,
-              finalAmount: finalAmount || c.finalAmount || (activeOffer?.status === "accepted" ? activeOffer.amount : null),
-              messages: message && !hasMsg ? [...c.messages, message] : c.messages,
-              updatedAt: new Date().toISOString(),
-            };
-          }
-          return c;
-        });
+        const nextChats = [...prev];
+        const index = nextChats.findIndex((c) => c.id === chatId);
+        if (index === -1) {
+          return updatedChat ? [updatedChat, ...nextChats] : nextChats;
+        }
+
+        const currentChat = nextChats[index];
+        const currentMessages = Array.isArray(currentChat.messages) ? currentChat.messages : [];
+        const merged = {
+          ...currentChat,
+          ...(updatedChat || {}),
+          activeOffer: activeOffer || currentChat.activeOffer,
+          finalAmount: finalAmount || currentChat.finalAmount,
+          messages: message && !currentMessages.some((m) => m.id === message.id)
+            ? [...currentMessages, message]
+            : currentMessages,
+          updatedAt: new Date().toISOString(),
+        };
+
+        nextChats.splice(index, 1, merged);
+        return nextChats;
       });
     };
 
     // 3. Live Deal Status Listener
     const handleDealStatusUpdated = ({ chatId, dealConfirmation, isBothConfirmed, listingStatus, listing, finalAmount }) => {
-      setChats((prev) => {
-        return prev.map((c) => {
-          if (c.id === chatId) {
-            return {
-              ...c,
-              dealConfirmation,
-              finalAmount: finalAmount || c.finalAmount,
-              updatedAt: new Date().toISOString(),
-            };
-          }
-          return c;
-        });
-      });
+      setChats((prev) => prev.map((c) => c.id === chatId ? { ...c, dealConfirmation, finalAmount: finalAmount || c.finalAmount, updatedAt: new Date().toISOString() } : c));
 
       if (listing) {
         updateListingStatus(listing.id, listingStatus);
@@ -383,6 +387,15 @@ export const ChatProvider = ({ children }) => {
     const socket = getSocket();
     const cleanText = text.trim();
     const clientMsgId = `msg_${Date.now()}_${Math.random().toString(36).substr(2, 6)}`;
+    const optimisticMessage = {
+      id: clientMsgId,
+      senderId: currentUser.id,
+      text: cleanText,
+      type: "text",
+      timestamp: new Date().toISOString(),
+    };
+
+    setChats((prev) => mergeIncomingChatMessage(prev, chatId, optimisticMessage, null));
 
     if (socket && socket.connected) {
       // Send via active WebSocket

@@ -24,10 +24,13 @@ import {
 } from "lucide-react";
 import { QuickReplies } from "./QuickReplies";
 import { DealReceiptModal } from "./DealReceiptModal";
+import { PickupPassModal } from "../store/PickupPassModal";
+import { UpiQrPayment } from "../common/UpiQrPayment";
 import { useAuth } from "../../context/AuthContext";
 import { useChat } from "../../context/ChatContext";
 import { useListings } from "../../context/ListingsContext";
 import { StatusBadge } from "../common/Badge";
+import { storeApi } from "../../services/api";
 
 const DEFAULT_AVATAR = "https://images.unsplash.com/photo-1534528741775-53994a69daeb?w=150&auto=format&fit=crop&q=80";
 
@@ -47,6 +50,8 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
   const [inputMessage, setInputMessage] = useState("");
   const [showNegotiationModal, setShowNegotiationModal] = useState(false);
   const [showReceiptModal, setShowReceiptModal] = useState(false);
+  const [showPickupPassModal, setShowPickupPassModal] = useState(false);
+  const [showPaymentModal, setShowPaymentModal] = useState(false);
 
   const listingPrice = chat.listing?.price ? Number(chat.listing.price) : 0;
   const currentProposed = (chat.activeOffer?.amount != null)
@@ -62,18 +67,47 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
 
   const [isProcessingPayment, setIsProcessingPayment] = useState(false);
   const [hasPaidLocally, setHasPaidLocally] = useState(false);
+  const [generatedPass, setGeneratedPass] = useState(null);
+  const [isGeneratingPass, setIsGeneratingPass] = useState(false);
 
   const messagesEndRef = useRef(null);
 
   const handleDummyPayment = () => {
-    setIsProcessingPayment(true);
-    // Simulate payment API call
-    setTimeout(() => {
-      setIsProcessingPayment(false);
+    const finalPrice = Number(finalAgreedAmount || chat.listing?.price || 0);
+    if (!window.Razorpay || finalPrice <= 0) {
+      // fallback if Razorpay not loaded
       setHasPaidLocally(true);
-      alert("✅ Test Dummy Payment Successful! Your Campus Pass is now unlocked.");
       setShowReceiptModal(true);
-    }, 1500);
+      return;
+    }
+    setIsProcessingPayment(true);
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_Tr27LhEzMnzdZm",
+      amount: Math.round(finalPrice * 100),
+      currency: "INR",
+      name: "UniMandi Marketplace",
+      description: chat.listing?.title || "Campus Deal Payment",
+      prefill: {
+        name: currentUser?.name || "Buyer",
+        email: currentUser?.email || "",
+        contact: currentUser?.phone || "",
+      },
+      theme: { color: "#FF5A1F" },
+      handler: (response) => {
+        setIsProcessingPayment(false);
+        setHasPaidLocally(true);
+        setShowReceiptModal(true);
+      },
+      modal: {
+        ondismiss: () => setIsProcessingPayment(false),
+      },
+    };
+    const rzp = new window.Razorpay(options);
+    rzp.on("payment.failed", (resp) => {
+      alert(`Payment failed: ${resp.error.description}`);
+      setIsProcessingPayment(false);
+    });
+    rzp.open();
   };
 
   const isBuyer = chat.buyerId === currentUserId;
@@ -132,6 +166,78 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
       const nextStatus = chat.listing.status === "Reserved" ? "Available" : "Reserved";
       updateListingStatus(chat.listing.id, nextStatus);
     }
+  };
+
+  const handleGenerateSACPaymentPass = async () => {
+    if (!chat || !finalAgreedAmount) return;
+
+    const amount = Number(finalAgreedAmount || chat.listing?.price || 0);
+    const buyerName = currentUser?.name || "Campus Student";
+    const buyerRoll = currentUser?.rollNo || `STU-${Math.floor(1000 + Math.random() * 9000)}`;
+
+    setIsGeneratingPass(true);
+
+    try {
+      const orderPayload = {
+        studentId: currentUser?.id || "guest",
+        studentName: buyerName,
+        studentRoll: buyerRoll,
+        studentBranch: currentUser?.branch || "Campus Deal",
+        items: [
+          {
+            productId: chat.listingId,
+            name: chat.listing?.title || "Campus Item",
+            price: amount,
+            quantity: 1,
+            category: chat.listing?.category || "Campus Deal",
+          },
+        ],
+        totalAmount: amount,
+        paymentMethod: "UPI QR",
+        paymentId: `deal_${Date.now()}`,
+      };
+
+      const res = await storeApi.createOrder(orderPayload);
+      const generated = res.order;
+      setGeneratedPass(generated);
+      setShowReceiptModal(true);
+      setShowPaymentModal(false);
+    } catch (err) {
+      const fallback = {
+        id: `deal_ord_${Date.now()}`,
+        pickupCode: `UM-${Math.floor(100000 + Math.random() * 900000)}`,
+        studentId: currentUser?.id || "guest",
+        studentName: buyerName,
+        studentRoll: buyerRoll,
+        studentBranch: currentUser?.branch || "Campus Deal",
+        items: [
+          {
+            productId: chat.listingId,
+            name: chat.listing?.title || "Campus Item",
+            price: amount,
+            quantity: 1,
+            category: chat.listing?.category || "Campus Deal",
+          },
+        ],
+        totalAmount: amount,
+        paymentMethod: "UPI QR",
+        status: "Ready for Pickup",
+        placedAt: new Date().toISOString(),
+        pickupSlot: "Today, Counter Pickup (SAC Counter #2)",
+        pickupLocation: "UniMandi SAC Counter #2",
+        qrDataPayload: `UNIMANDI-DEAL-${Date.now()}-${currentUser?.id || "guest"}`,
+      };
+      setGeneratedPass(fallback);
+      setShowReceiptModal(true);
+      setShowPaymentModal(false);
+    } finally {
+      setIsGeneratingPass(false);
+    }
+  };
+
+  const handlePaymentConfirmed = async ({ paymentId, method, upiId }) => {
+    if (!finalAgreedAmount) return;
+    await handleGenerateSACPaymentPass();
   };
 
   // Calculate discount specs
@@ -283,18 +389,27 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
                     <span>View Campus Pass</span>
                   </button>
                 ) : (
-                  <button
-                    onClick={handleDummyPayment}
-                    disabled={isProcessingPayment}
-                    className="px-3 py-1 rounded-xl text-xs font-bold bg-[#FF5A1F] hover:bg-[#E04F1A] text-white flex items-center gap-1.5 shadow-md transition-all active:scale-95 disabled:opacity-75"
-                  >
-                    {isProcessingPayment ? (
-                      <Clock className="w-3.5 h-3.5 animate-spin" />
-                    ) : (
-                      <DollarSign className="w-3.5 h-3.5" />
-                    )}
-                    <span>{isProcessingPayment ? "Processing..." : `Pay ₹${finalAgreedAmount || chat.listing?.price}`}</span>
-                  </button>
+                  <div className="flex flex-col gap-1">
+                    <button
+                      onClick={() => setShowPaymentModal(true)}
+                      disabled={isProcessingPayment || isGeneratingPass}
+                      className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-[#FF5A1F] hover:bg-[#E04F1A] text-white flex items-center gap-1 shadow-md transition-all active:scale-95 disabled:opacity-75"
+                    >
+                      {isProcessingPayment || isGeneratingPass ? (
+                        <Clock className="w-3 h-3 animate-spin" />
+                      ) : (
+                        <DollarSign className="w-3 h-3" />
+                      )}
+                      <span>{isGeneratingPass ? "Generating QR Pass..." : `💳 SAC Pay ₹${finalAgreedAmount || chat.listing?.price}`}</span>
+                    </button>
+                    <button
+                      onClick={() => setShowPaymentModal(true)}
+                      disabled={isProcessingPayment || isGeneratingPass}
+                      className="px-2.5 py-1 rounded-xl text-[11px] font-bold bg-indigo-600 hover:bg-indigo-700 text-white flex items-center gap-1 shadow-xs transition-all active:scale-95 disabled:opacity-75"
+                    >
+                      📱 UPI QR at SAC Counter
+                    </button>
+                  </div>
                 )
               ) : (
                 <button
@@ -741,8 +856,70 @@ export const MessageThread = ({ chat, onBack, onOpenRatingModal }) => {
         onClose={() => setShowReceiptModal(false)}
         chat={chat}
         onOpenRating={onOpenRatingModal}
+        currentUser={currentUser}
       />
 
+      {/* 8. PICKUP PASS / UPI QR PAYMENT MODAL (SAC Store Flow) */}
+      {showPickupPassModal && (
+        <PickupPassModal
+          isOpen={showPickupPassModal}
+          onClose={() => setShowPickupPassModal(false)}
+          chat={chat}
+          currentUser={currentUser}
+          onOpenRating={onOpenRatingModal}
+        />
+      )}
+
+      {/* 9. SAC PAYMENT QR PASS MODAL */}
+      {showPaymentModal && (
+        <div className="fixed inset-0 z-[60] flex items-center justify-center bg-black/60 backdrop-blur-sm p-3 sm:p-4">
+          <div className="w-full max-w-md rounded-3xl bg-white p-4 border border-slate-200 shadow-modal">
+            <div className="flex items-center justify-between mb-3">
+              <div>
+                <p className="text-[10px] font-bold uppercase tracking-[0.18em] text-slate-400">UniMandi SAC Checkout</p>
+                <h3 className="text-base font-display font-extrabold text-[#121417]">Pay & Generate QR Pickup Pass</h3>
+              </div>
+              <button onClick={() => setShowPaymentModal(false)} className="p-2 rounded-full hover:bg-slate-100 text-slate-500">
+                <X className="w-4 h-4" />
+              </button>
+            </div>
+
+            <div className="rounded-2xl bg-slate-50 border border-slate-200 p-3 mb-3">
+              <div className="flex items-center justify-between text-xs">
+                <span className="text-slate-500">Amount due</span>
+                <span className="font-black text-[#121417]">₹{formatINR(finalAgreedAmount || chat.listing?.price || 0)}</span>
+              </div>
+              <div className="mt-2 text-[11px] text-slate-500">Safely pay through the official UniMandi SAC store flow and collect your QR verification pass at the counter.</div>
+            </div>
+
+            <UpiQrPayment
+              amount={Number(finalAgreedAmount || chat.listing?.price || 0)}
+              description={`UniMandi Campus Deal - ${chat.listing?.title || "Item"}`}
+              accentColor="#FF5A1F"
+              onPaymentConfirmed={async (payment) => {
+                await handleGenerateSACPaymentPass();
+              }}
+              onCancel={() => setShowPaymentModal(false)}
+            />
+          </div>
+        </div>
+      )}
+
+      {generatedPass && (
+        <PickupPassModal
+          isOpen={Boolean(generatedPass)}
+          onClose={() => setGeneratedPass(null)}
+          order={generatedPass}
+        />
+      )}
+
+      <DealReceiptModal
+        isOpen={showReceiptModal}
+        onClose={() => setShowReceiptModal(false)}
+        chat={chat}
+        onOpenRating={onOpenRatingModal}
+        currentUser={currentUser}
+      />
     </div>
   );
 };

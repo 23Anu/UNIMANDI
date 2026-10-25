@@ -20,7 +20,7 @@ import {
   Layers,
   HelpCircle
 } from "lucide-react";
-import { CATEGORIES, BRANCHES, YEARS } from "../../data/seedListings";
+import { CATEGORIES, BRANCHES, YEARS, CATEGORY_TREE } from "../../data/seedListings";
 import { useListings } from "../../context/ListingsContext";
 import { useAuth } from "../../context/AuthContext";
 
@@ -243,8 +243,8 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                         type="button"
                         onClick={() => setType("Rent")}
                         className={`p-4 rounded-2xl border text-left transition-all ${type === "Rent"
-                            ? "bg-orange-50 border-[#FF5A1F] text-[#121417] ring-2 ring-[#FF5A1F]/20"
-                            : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600"
+                          ? "bg-orange-50 border-[#FF5A1F] text-[#121417] ring-2 ring-[#FF5A1F]/20"
+                          : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600"
                           }`}
                       >
                         <span className="font-display font-bold text-base block text-[#121417]">
@@ -259,8 +259,8 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                         type="button"
                         onClick={() => setType("Sell")}
                         className={`p-4 rounded-2xl border text-left transition-all ${type === "Sell"
-                            ? "bg-[#121417] border-[#121417] text-white ring-2 ring-[#121417]/20"
-                            : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600"
+                          ? "bg-[#121417] border-[#121417] text-white ring-2 ring-[#121417]/20"
+                          : "bg-slate-50 hover:bg-slate-100 border-slate-200 text-slate-600"
                           }`}
                       >
                         <span className={`font-display font-bold text-base block ${type === "Sell" ? "text-white" : "text-[#121417]"}`}>
@@ -279,7 +279,7 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                       Select Campus Category
                     </label>
                     <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-                      {CATEGORIES.filter((c) => c !== "All").map((cat) => {
+                      {CATEGORIES.filter((c) => c !== "All" && !CATEGORY_TREE[c]?.comingSoon).map((cat) => {
                         const isSelected = category === cat;
                         const isOther = cat.includes("Other");
                         return (
@@ -288,10 +288,10 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                             type="button"
                             onClick={() => setCategory(cat)}
                             className={`p-3 rounded-xl border text-xs font-semibold text-left transition-all flex items-center justify-between ${isSelected
-                                ? "bg-[#121417] text-white border-[#121417] shadow-sm scale-102"
-                                : isOther
-                                  ? "bg-purple-50 text-purple-900 border-purple-200 hover:bg-purple-100"
-                                  : "bg-slate-50 hover:bg-slate-100 text-[#121417] border-slate-200"
+                              ? "bg-[#121417] text-white border-[#121417] shadow-sm scale-102"
+                              : isOther
+                                ? "bg-purple-50 text-purple-900 border-purple-200 hover:bg-purple-100"
+                                : "bg-slate-50 hover:bg-slate-100 text-[#121417] border-slate-200"
                               }`}
                           >
                             <span>{cat}</span>
@@ -354,8 +354,8 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                           type="button"
                           onClick={() => setCondition(cond)}
                           className={`py-2 px-3 rounded-xl border text-xs font-semibold text-center transition-colors ${condition === cond
-                              ? "bg-[#121417] text-white border-[#121417]"
-                              : "bg-slate-50 hover:bg-slate-100 text-[#121417] border-slate-200"
+                            ? "bg-[#121417] text-white border-[#121417]"
+                            : "bg-slate-50 hover:bg-slate-100 text-[#121417] border-slate-200"
                             }`}
                         >
                           {cond}
@@ -381,12 +381,12 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                             type="button"
                             onClick={() => setGenderTarget(g.id)}
                             className={`py-2 px-2.5 rounded-xl border text-xs font-bold transition-all ${genderTarget === g.id
-                                ? g.id === "Girls Only"
-                                  ? "bg-rose-600 text-white border-rose-600 shadow-sm"
-                                  : g.id === "Boys Only"
-                                    ? "bg-blue-600 text-white border-blue-600 shadow-sm"
-                                    : "bg-[#121417] text-white border-[#121417]"
-                                : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
+                              ? g.id === "Girls Only"
+                                ? "bg-rose-600 text-white border-rose-600 shadow-sm"
+                                : g.id === "Boys Only"
+                                  ? "bg-blue-600 text-white border-blue-600 shadow-sm"
+                                  : "bg-[#121417] text-white border-[#121417]"
+                              : "bg-white text-slate-700 border-slate-200 hover:bg-slate-50"
                               }`}
                           >
                             {g.label}
@@ -444,8 +444,8 @@ export const PostItemModal = ({ isOpen, onClose, onPostSuccess }) => {
                       onDragLeave={handleDragLeave}
                       onDrop={handleDrop}
                       className={`p-6 sm:p-8 rounded-2xl border-2 border-dashed text-center cursor-pointer transition-all duration-200 flex flex-col items-center justify-center gap-3 ${isDragging
-                          ? "border-[#FF5A1F] bg-orange-50/80 scale-102"
-                          : "border-slate-300 bg-slate-50 hover:bg-slate-100/80 hover:border-[#FF5A1F]/60"
+                        ? "border-[#FF5A1F] bg-orange-50/80 scale-102"
+                        : "border-slate-300 bg-slate-50 hover:bg-slate-100/80 hover:border-[#FF5A1F]/60"
                         }`}
                     >
                       <div className="w-14 h-14 rounded-2xl bg-orange-100 text-[#FF5A1F] flex items-center justify-center shadow-xs">

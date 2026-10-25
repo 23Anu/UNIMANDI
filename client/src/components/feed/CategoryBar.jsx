@@ -54,7 +54,8 @@ const categoryConfig = {
     icon: Home,
     accent: "from-rose-500 to-red-600",
     glow: "hover:shadow-rose-200",
-    badge: "12 Items",
+    badge: "Coming Soon",
+    comingSoon: true,
   },
   "Cycles & Campus Commute": {
     icon: Bike,
@@ -127,17 +128,23 @@ export const CategoryBar = () => {
           const Icon = config.icon;
           const isSelected = selectedCategory === cat;
 
+          const isComingSoon = config.comingSoon;
+
           return (
             <button
               key={cat}
-              onClick={() => setSelectedCategory(cat)}
-              className={`group flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-300 border active:scale-95 ${isSelected
+              onClick={() => !isComingSoon && setSelectedCategory(cat)}
+              className={`group flex items-center gap-2.5 px-4 py-2.5 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all duration-300 border active:scale-95 ${isComingSoon
+                ? "bg-slate-50 text-slate-400 border-slate-200 cursor-not-allowed opacity-70"
+                : isSelected
                   ? "bg-[#121417] text-white border-[#121417] shadow-md -translate-y-0.5"
                   : `bg-white hover:bg-slate-50 text-slate-700 hover:text-[#121417] border-slate-200/90 shadow-sm hover:-translate-y-0.5 hover:border-[#FF5A1F]/30 ${config.glow}`
                 }`}
             >
               <div
-                className={`w-6 h-6 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${isSelected
+                className={`w-6 h-6 rounded-lg flex items-center justify-center transition-transform duration-300 group-hover:scale-110 ${isComingSoon
+                  ? "bg-slate-200 text-slate-400"
+                  : isSelected
                     ? "bg-[#FF5A1F] text-white shadow-xs"
                     : "bg-slate-100 text-slate-600 group-hover:bg-[#FF5A1F]/10 group-hover:text-[#FF5A1F]"
                   }`}
@@ -147,9 +154,11 @@ export const CategoryBar = () => {
 
               <span>{cat}</span>
 
-              {/* Subdued pill count */}
+              {/* Badge */}
               <span
-                className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${isSelected
+                className={`text-[10px] font-bold px-1.5 py-0.2 rounded-md ${isComingSoon
+                  ? "bg-amber-100 text-amber-600"
+                  : isSelected
                     ? "bg-white/15 text-slate-200"
                     : "bg-slate-100 text-slate-500 group-hover:bg-slate-200"
                   }`}
@@ -193,12 +202,12 @@ export const CategoryBar = () => {
                     }
                   }}
                   className={`group px-3.5 py-2 sm:px-4 sm:py-2.5 rounded-xl text-xs font-bold whitespace-nowrap transition-all duration-200 flex items-center gap-2 border active:scale-95 shadow-2xs ${isSubSelected
-                      ? "bg-[#121417] text-white border-[#121417] shadow-sm -translate-y-0.5"
-                      : isUrgentTag
-                        ? "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 hover:border-rose-300 hover:-translate-y-0.5"
-                        : isSeniorTag
-                          ? "bg-orange-50 text-[#FF5A1F] border-orange-200 hover:bg-orange-100 hover:border-orange-300 hover:-translate-y-0.5"
-                          : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 hover:text-[#121417] hover:border-slate-300 hover:-translate-y-0.5"
+                    ? "bg-[#121417] text-white border-[#121417] shadow-sm -translate-y-0.5"
+                    : isUrgentTag
+                      ? "bg-rose-50 text-rose-700 border-rose-200 hover:bg-rose-100 hover:border-rose-300 hover:-translate-y-0.5"
+                      : isSeniorTag
+                        ? "bg-orange-50 text-[#FF5A1F] border-orange-200 hover:bg-orange-100 hover:border-orange-300 hover:-translate-y-0.5"
+                        : "bg-white hover:bg-slate-50 text-slate-700 border-slate-200 hover:text-[#121417] hover:border-slate-300 hover:-translate-y-0.5"
                     }`}
                 >
                   <span className="text-sm">{icon}</span>

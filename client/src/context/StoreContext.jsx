@@ -64,7 +64,7 @@ export const StoreProvider = ({ children }) => {
 
   const [products, setProducts] = useState(() => {
     try {
-      const saved = localStorage.getItem("rentify_store_products");
+      const saved = localStorage.getItem("unimandi_store_products");
       return saved ? JSON.parse(saved) : INITIAL_STORE_PRODUCTS;
     } catch (e) {
       return INITIAL_STORE_PRODUCTS;
@@ -73,7 +73,7 @@ export const StoreProvider = ({ children }) => {
 
   const [orders, setOrders] = useState(() => {
     try {
-      const saved = localStorage.getItem("rentify_store_orders");
+      const saved = localStorage.getItem("unimandi_store_orders");
       return saved ? JSON.parse(saved) : [];
     } catch (e) {
       return [];
@@ -107,34 +107,24 @@ export const StoreProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem("rentify_store_products", JSON.stringify(products));
-    } catch (e) {}
+      localStorage.setItem("unimandi_store_products", JSON.stringify(products));
+    } catch (e) { }
   }, [products]);
 
   useEffect(() => {
     try {
-      localStorage.setItem("rentify_store_orders", JSON.stringify(orders));
-    } catch (e) {}
+      localStorage.setItem("unimandi_store_orders", JSON.stringify(orders));
+    } catch (e) { }
   }, [orders]);
 
   // Student Places Order with Payment Verification
-  const placeStoreOrder = async (cartItems, paymentMethod = "Razorpay UPI") => {
+  const placeStoreOrder = async (cartItems, paymentMethod = "Razorpay UPI", paymentDetails = {}) => {
     const total = cartItems.reduce((sum, item) => sum + item.price * item.quantity, 0);
 
-    const paymentOrderPayload = {
-      studentId: currentUser?.id || "student_guest",
-      items: cartItems,
-      totalAmount: total,
-    };
-
     try {
-      // 1. Create Payment Order (Razorpay / Instant Campus UPI)
-      const payRes = await storeApi.createPaymentOrder(paymentOrderPayload).catch(() => ({
-        success: true,
-        orderId: `order_sim_${Date.now()}`,
-      }));
-
       // 2. Complete Order & Issue Verified Pickup Pass
+      // paymentDetails.paymentId is set when Razorpay popup already handled payment
+      const paymentId = paymentDetails.paymentId || `pay_sim_${Date.now()}`;
       const orderPayload = {
         studentId: currentUser?.id || "student_guest",
         studentName: currentUser?.name || "Campus Student",
@@ -143,7 +133,8 @@ export const StoreProvider = ({ children }) => {
         items: cartItems,
         totalAmount: total,
         paymentMethod,
-        paymentId: payRes.orderId || `pay_sim_${Date.now()}`,
+        paymentId,
+        razorpaySignature: paymentDetails.razorpaySignature || null,
       };
 
       const res = await storeApi.createOrder(orderPayload);

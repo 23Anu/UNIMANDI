@@ -17,6 +17,8 @@ import {
 } from "lucide-react";
 import { useStore } from "../../context/StoreContext";
 import { useAuth } from "../../context/AuthContext";
+import { storeApi } from "../../services/api";
+import { UpiQrPayment } from "../common/UpiQrPayment";
 import { PickupPassModal } from "./PickupPassModal";
 
 const STORE_CATEGORIES = [
@@ -37,6 +39,7 @@ export const TanishStoreView = () => {
   const [selectedPassToView, setSelectedPassToView] = useState(null);
   const [paymentMethod, setPaymentMethod] = useState("Campus Direct UPI");
   const [isProcessingOrder, setIsProcessingOrder] = useState(false);
+  const [showUpiQr, setShowUpiQr] = useState(false);
 
   const filteredProducts = products.filter((p) => {
     if (selectedCategory !== "All" && p.category !== selectedCategory) {
@@ -87,23 +90,91 @@ export const TanishStoreView = () => {
   const totalCartAmount = cart.reduce((sum, item) => sum + item.price * item.quantity, 0);
   const totalCartItemsCount = cart.reduce((sum, item) => sum + item.quantity, 0);
 
-  const handlePayAndGeneratePass = (e) => {
+  const handlePayAndGeneratePass = async (e) => {
     e.preventDefault();
     if (cart.length === 0) return;
 
     setIsProcessingOrder(true);
-    setTimeout(() => {
+
+    try {
+      // 1. Create Razorpay order on backend
+      const payRes = await storeApi.createPaymentOrder({
+        studentId: currentUser?.id || "student_guest",
+        items: cart,
+        totalAmount: totalCartAmount,
+      });
+
+      const razorpayKeyId = payRes.keyId || import.meta.env.VITE_RAZORPAY_KEY_ID;
+
+      // 2. If Razorpay order created, open checkout popup
+      if (payRes.orderId && window.Razorpay && razorpayKeyId) {
+        const options = {
+          key: razorpayKeyId,
+          amount: payRes.amount,
+          currency: payRes.currency || "INR",
+          name: "UniMandi SAC Store",
+          description: `${totalCartItemsCount} items — Campus Stationery`,
+          order_id: payRes.mode === "live_razorpay" ? payRes.orderId : undefined,
+          prefill: {
+            name: currentUser?.name || "Campus Student",
+            email: currentUser?.email || "",
+            contact: currentUser?.phone || "",
+          },
+          theme: { color: "#FF5A1F" },
+          handler: async (response) => {
+            // 3. Payment successful — place order with payment ID
+            try {
+              const newOrder = await placeStoreOrder(cart, "Razorpay", {
+                paymentId: response.razorpay_payment_id,
+                razorpayOrderId: response.razorpay_order_id,
+                razorpaySignature: response.razorpay_signature,
+              });
+              setCart([]);
+              setIsCheckoutOpen(false);
+              setSelectedPassToView(newOrder);
+            } catch (err) {
+              console.error("Order creation after payment failed:", err);
+              alert("Payment received but order creation failed. Contact support.");
+            }
+            setIsProcessingOrder(false);
+          },
+          modal: {
+            ondismiss: () => {
+              setIsProcessingOrder(false);
+            },
+          },
+        };
+
+        const rzp = new window.Razorpay(options);
+        rzp.on("payment.failed", (resp) => {
+          console.error("Razorpay payment failed:", resp.error);
+          alert(`Payment failed: ${resp.error.description}`);
+          setIsProcessingOrder(false);
+        });
+        rzp.open();
+        return;
+      }
+
+      // Fallback: direct order without Razorpay popup
+      const newOrder = await placeStoreOrder(cart, paymentMethod);
+      setCart([]);
+      setIsCheckoutOpen(false);
+      setIsProcessingOrder(false);
+      setSelectedPassToView(newOrder);
+    } catch (err) {
+      console.error("Checkout error:", err);
+      // Final fallback
       const newOrder = placeStoreOrder(cart, paymentMethod);
       setCart([]);
       setIsCheckoutOpen(false);
       setIsProcessingOrder(false);
       setSelectedPassToView(newOrder);
-    }, 1200);
+    }
   };
 
   return (
     <div className="space-y-6 text-left animate-reveal-up pb-12">
-      
+
       {/* Official Tanish Store Header Banner */}
       <div className="relative overflow-hidden rounded-3xl bg-[#121417] text-white p-6 sm:p-8 border border-slate-700 shadow-card">
         <div className="absolute right-0 top-0 w-80 h-80 bg-[#FF5A1F]/20 rounded-full blur-3xl pointer-events-none" />
@@ -169,11 +240,10 @@ export const TanishStoreView = () => {
             <button
               key={cat}
               onClick={() => setSelectedCategory(cat)}
-              className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all border ${
-                isSelected
-                  ? "bg-[#121417] text-white border-[#121417] shadow-xs"
-                  : "bg-white hover:bg-slate-100 text-[#121417] border-slate-200"
-              }`}
+              className={`px-4 py-2 rounded-2xl text-xs sm:text-sm font-bold whitespace-nowrap transition-all border ${isSelected
+                ? "bg-[#121417] text-white border-[#121417] shadow-xs"
+                : "bg-white hover:bg-slate-100 text-[#121417] border-slate-200"
+                }`}
             >
               {cat}
             </button>
@@ -324,11 +394,10 @@ export const TanishStoreView = () => {
                       {ord.pickupCode}
                     </span>
                     <span
-                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${
-                        ord.status === "Picked Up"
-                          ? "bg-emerald-50 text-emerald-700 border border-emerald-500/30"
-                          : "bg-amber-50 text-amber-700 border border-amber-500/30"
-                      }`}
+                      className={`text-[10px] font-bold px-2 py-0.5 rounded-full ${ord.status === "Picked Up"
+                        ? "bg-emerald-50 text-emerald-700 border border-emerald-500/30"
+                        : "bg-amber-50 text-amber-700 border border-amber-500/30"
+                        }`}
                     >
                       {ord.status}
                     </span>
@@ -394,54 +463,92 @@ export const TanishStoreView = () => {
                 Choose Payment Method
               </label>
               <div className="grid grid-cols-2 gap-2">
-                {["Campus Direct UPI", "Prepaid Student Card"].map((method) => (
+                {[
+                  { id: "razorpay", label: "💳 Razorpay", sub: "Cards / UPI / NetBanking" },
+                  { id: "upi_qr", label: "📱 UPI QR Scan", sub: "PhonePe / GPay / Paytm" },
+                ].map((method) => (
                   <button
-                    key={method}
+                    key={method.id}
                     type="button"
-                    onClick={() => setPaymentMethod(method)}
-                    className={`p-2.5 rounded-xl border text-left font-semibold transition-all ${
-                      paymentMethod === method
-                        ? "bg-[#121417] text-white border-[#121417]"
-                        : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
-                    }`}
+                    onClick={() => {
+                      setPaymentMethod(method.id);
+                      setShowUpiQr(method.id === "upi_qr");
+                    }}
+                    className={`p-2.5 rounded-xl border text-left transition-all ${paymentMethod === method.id
+                      ? "bg-[#121417] text-white border-[#121417]"
+                      : "bg-slate-50 hover:bg-slate-100 text-slate-700 border-slate-200"
+                      }`}
                   >
-                    {method}
+                    <span className="font-bold text-xs block">{method.label}</span>
+                    <span className={`text-[10px] block mt-0.5 ${paymentMethod === method.id ? "text-slate-300" : "text-slate-400"}`}>{method.sub}</span>
                   </button>
                 ))}
               </div>
             </div>
 
-            {/* Total & Place Order */}
-            <div className="p-3 bg-slate-50 rounded-2xl flex justify-between items-center text-sm font-bold">
-              <span>Total Payable:</span>
-              <span className="font-display text-xl text-[#FF5A1F]">
-                ₹{totalCartAmount.toLocaleString("en-IN")}
-              </span>
-            </div>
+            {/* UPI QR View (when selected) */}
+            {showUpiQr ? (
+              <div className="border-t border-slate-100 pt-3">
+                <UpiQrPayment
+                  amount={totalCartAmount}
+                  description={`SAC Store — ${totalCartItemsCount} items`}
+                  accentColor="#FF5A1F"
+                  onPaymentConfirmed={async (upiDetails) => {
+                    setIsProcessingOrder(true);
+                    try {
+                      const newOrder = await placeStoreOrder(cart, "UPI QR", {
+                        paymentId: upiDetails.paymentId,
+                      });
+                      setCart([]);
+                      setIsCheckoutOpen(false);
+                      setShowUpiQr(false);
+                      setSelectedPassToView(newOrder);
+                    } catch (err) {
+                      console.error("UPI order error:", err);
+                    }
+                    setIsProcessingOrder(false);
+                  }}
+                  onCancel={() => {
+                    setShowUpiQr(false);
+                    setPaymentMethod("razorpay");
+                  }}
+                />
+              </div>
+            ) : (
+              <>
+                {/* Total & Place Order */}
+                <div className="p-3 bg-slate-50 rounded-2xl flex justify-between items-center text-sm font-bold">
+                  <span>Total Payable:</span>
+                  <span className="font-display text-xl text-[#FF5A1F]">
+                    ₹{totalCartAmount.toLocaleString("en-IN")}
+                  </span>
+                </div>
 
-            <div className="pt-2 flex gap-2">
-              <button
-                type="button"
-                onClick={() => setIsCheckoutOpen(false)}
-                className="btn-secondary flex-1 text-xs py-2.5"
-              >
-                Cancel
-              </button>
-              <button
-                onClick={handlePayAndGeneratePass}
-                disabled={isProcessingOrder}
-                className="btn-primary flex-1 text-xs py-2.5 font-bold shadow-md flex items-center justify-center gap-1.5"
-              >
-                {isProcessingOrder ? (
-                  <span>Generating Pass...</span>
-                ) : (
-                  <>
-                    <QrCode className="w-4 h-4" />
-                    <span>Pay & Generate QR</span>
-                  </>
-                )}
-              </button>
-            </div>
+                <div className="pt-2 flex gap-2">
+                  <button
+                    type="button"
+                    onClick={() => setIsCheckoutOpen(false)}
+                    className="btn-secondary flex-1 text-xs py-2.5"
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    onClick={handlePayAndGeneratePass}
+                    disabled={isProcessingOrder}
+                    className="btn-primary flex-1 text-xs py-2.5 font-bold shadow-md flex items-center justify-center gap-1.5"
+                  >
+                    {isProcessingOrder ? (
+                      <span>Generating Pass...</span>
+                    ) : (
+                      <>
+                        <QrCode className="w-4 h-4" />
+                        <span>Pay & Generate QR</span>
+                      </>
+                    )}
+                  </button>
+                </div>
+              </>
+            )}
           </div>
         </div>
       )}

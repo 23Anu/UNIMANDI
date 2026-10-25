@@ -63,21 +63,6 @@ const SHOWCASE_SLIDES = [
     icon: "⚡",
   },
   {
-    keyword: "Hostel Dorm Gear",
-    title: "50L Silent Low-Power Dorm Fridge",
-    category: "Hostel & PG Living",
-    price: "₹400",
-    unit: "/month",
-    type: "Rent",
-    condition: "Good",
-    image: "https://images.unsplash.com/photo-1584992236310-6edddc08acff?w=600&auto=format&fit=crop&q=80",
-    seller: "Rohan Verma (Hostel 3)",
-    sellerAvatar: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=150&auto=format&fit=crop&q=80",
-    trust: "4.7",
-    location: "Hostel Block 3 Ground Floor",
-    icon: "🧊",
-  },
-  {
     keyword: "Campus Bicycles",
     title: "Hero Sprint 21-Speed Gear Bicycle",
     category: "Cycles & Commute",
@@ -121,13 +106,13 @@ export const HeroBanner = ({ onBrowseClick, onPostClick }) => {
 
   return (
     <div className="relative overflow-hidden rounded-3xl bg-gradient-to-br from-white via-[#FFF9F5] to-[#F8F9FA] text-[#121417] p-6 sm:p-10 lg:p-12 mb-8 shadow-card border border-slate-200/90 text-left">
-      
+
       {/* Subtle Warm Ambient Accent */}
       <div className="absolute -top-24 -right-24 w-96 h-96 rounded-full bg-[#FF5A1F]/10 blur-3xl pointer-events-none" />
       <div className="absolute -bottom-24 -left-24 w-80 h-80 rounded-full bg-[#10B981]/10 blur-3xl pointer-events-none" />
 
       <div className="relative z-10 flex flex-col lg:flex-row items-center justify-between gap-8 lg:gap-12">
-        
+
         {/* Left Content Area */}
         <div className="flex-1 max-w-2xl">
           {/* Official Brand Badge & Department Pill */}
@@ -213,7 +198,7 @@ export const HeroBanner = ({ onBrowseClick, onPostClick }) => {
         >
           {/* Card Frame with Smooth Shadow & Border */}
           <div className="bg-white rounded-3xl border border-slate-200/90 shadow-xl overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-1">
-            
+
             {/* Sliding Image Container */}
             <div className="relative aspect-[16/11] w-full overflow-hidden bg-slate-100">
               <img
@@ -319,11 +304,10 @@ export const HeroBanner = ({ onBrowseClick, onPostClick }) => {
                   <button
                     key={idx}
                     onClick={() => setSlideIndex(idx)}
-                    className={`h-1.5 rounded-full transition-all duration-300 ${
-                      slideIndex === idx
+                    className={`h-1.5 rounded-full transition-all duration-300 ${slideIndex === idx
                         ? "w-6 bg-[#FF5A1F]"
                         : "w-1.5 bg-slate-200 hover:bg-slate-300"
-                    }`}
+                      }`}
                     aria-label={`Slide ${idx + 1}`}
                   />
                 ))}

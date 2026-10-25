@@ -1,181 +1,67 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
-import { initialUsers } from "../data/seedListings";
 import { authApi } from "../services/api";
-import { registerUserSocket } from "../services/socket";
+import { registerUserSocket, getSocket } from "../services/socket";
 
 const AuthContext = createContext();
 
 export const AuthProvider = ({ children }) => {
   const [currentUser, setCurrentUser] = useState(() => {
     try {
-      const saved = sessionStorage.getItem("rentify_session_user");
+      const saved = sessionStorage.getItem("unimandi_session_user");
       return saved ? JSON.parse(saved) : null;
     } catch (e) {
       return null;
     }
   });
 
-  const [registeredUsers, setRegisteredUsers] = useState(() => {
+  const [needsProfileSetup, setNeedsProfileSetup] = useState(() => {
     try {
-      const saved = localStorage.getItem("rentify_registered_users");
-      return saved ? JSON.parse(saved) : initialUsers;
+      const saved = sessionStorage.getItem("unimandi_session_user");
+      const user = saved ? JSON.parse(saved) : null;
+      return user ? !user.isProfileComplete : false;
     } catch (e) {
-      return initialUsers;
+      return false;
     }
   });
-
-  const [needsProfileSetup, setNeedsProfileSetup] = useState(() => {
-    return currentUser ? !currentUser.isProfileComplete : false;
-  });
-
-  // Fetch registered users from backend on load
-  useEffect(() => {
-    const fetchUsers = async () => {
-      try {
-        const res = await authApi.getAllUsers();
-        if (res.users && res.users.length > 0) {
-          setRegisteredUsers(res.users);
-        }
-      } catch (err) {
-        console.warn("Could not fetch remote users, using local cache:", err.message);
-      }
-    };
-    fetchUsers();
-  }, []);
 
   // Sync user state and register socket
   useEffect(() => {
     try {
       if (currentUser) {
-        sessionStorage.setItem("rentify_session_user", JSON.stringify(currentUser));
+        sessionStorage.setItem("unimandi_session_user", JSON.stringify(currentUser));
         setNeedsProfileSetup(!currentUser.isProfileComplete);
+
+        const socket = getSocket();
+        socket.on("connect", () => {
+          registerUserSocket(currentUser.id);
+        });
         registerUserSocket(currentUser.id);
       } else {
-        sessionStorage.removeItem("rentify_session_user");
+        sessionStorage.removeItem("unimandi_session_user");
         setNeedsProfileSetup(false);
       }
     } catch (e) { }
   }, [currentUser]);
 
-  useEffect(() => {
+  // ── Google OAuth Login (Real) ────────────────────────────────────────────────
+  // credential = the Google ID token from @react-oauth/google
+  const loginWithGoogle = async (credential) => {
     try {
-      localStorage.setItem("rentify_registered_users", JSON.stringify(registeredUsers));
-    } catch (e) { }
-  }, [registeredUsers]);
-
-  // Google OAuth Login
-  const loginWithGoogle = async (customProfile = null) => {
-    try {
-      if (customProfile) {
-        const res = await authApi.googleLogin(customProfile);
-        if (res.token) {
-          localStorage.setItem("rentify_auth_token", res.token);
-        }
-        const user = res.user;
-        setCurrentUser(user);
-        setNeedsProfileSetup(!user.isProfileComplete);
-        setRegisteredUsers((prev) => {
-          const exists = prev.some((u) => u.id === user.id);
-          return exists ? prev.map((u) => (u.id === user.id ? user : u)) : [user, ...prev];
-        });
-        return user;
+      const res = await authApi.googleVerify(credential);
+      if (res.token) {
+        localStorage.setItem("unimandi_auth_token", res.token);
       }
-
-      // Default persona login
-      const defaultUser = registeredUsers[0] || initialUsers[0];
-      const res = await authApi.googleAuth?.({
-        email: defaultUser.email,
-        name: defaultUser.name,
-        avatar: defaultUser.avatar,
-      }).catch(() => null);
-
-      if (res?.token) {
-        localStorage.setItem("rentify_auth_token", res.token);
-      }
-
-      const user = { ...defaultUser, isProfileComplete: true };
+      const user = res.user;
       setCurrentUser(user);
-      setNeedsProfileSetup(false);
+      setNeedsProfileSetup(!user.isProfileComplete);
       return user;
     } catch (err) {
       console.error("Google login error:", err);
-      const fallbackUser = initialUsers[0];
-      setCurrentUser(fallbackUser);
-      return fallbackUser;
-    }
-  };
-
-  // Login via Phone OTP
-  const loginWithPhone = async (phone, otp) => {
-    try {
-      const res = await authApi.verifyPhoneOtp(phone, otp);
-      if (res.token) {
-        localStorage.setItem("rentify_auth_token", res.token);
-      }
-      const user = res.user;
-      setCurrentUser(user);
-      setNeedsProfileSetup(!user.isProfileComplete);
-      setRegisteredUsers((prev) => {
-        const exists = prev.some((u) => u.id === user.id);
-        return exists ? prev.map((u) => (u.id === user.id ? user : u)) : [user, ...prev];
-      });
-      return user;
-    } catch (err) {
-      console.error("Phone login error:", err);
       throw err;
     }
   };
 
-  // Login via College Email
-  const loginWithCollegeEmail = async (email, name) => {
-    try {
-      const res = await authApi.googleLogin({
-        email,
-        name: name || email.split("@")[0].replace(".", " "),
-      });
-      if (res.token) {
-        localStorage.setItem("rentify_auth_token", res.token);
-      }
-      const user = res.user;
-      setCurrentUser(user);
-      setNeedsProfileSetup(!user.isProfileComplete);
-      setRegisteredUsers((prev) => {
-        const exists = prev.some((u) => u.id === user.id);
-        return exists ? prev.map((u) => (u.id === user.id ? user : u)) : [user, ...prev];
-      });
-      return user;
-    } catch (err) {
-      console.error("College email login error:", err);
-      throw err;
-    }
-  };
-
-  // ── Credential-based Register (Sign Up) ─────────────────────────────────────
-  const registerUser = async (formData) => {
-    const res = await authApi.register(formData);
-    if (res.token) localStorage.setItem("rentify_auth_token", res.token);
-    const user = res.user;
-    setCurrentUser(user);
-    setNeedsProfileSetup(!user.isProfileComplete);
-    setRegisteredUsers((prev) => [user, ...prev]);
-    return user;
-  };
-
-  // ── Credential-based Login ───────────────────────────────────────────────────
-  const loginWithCredentials = async (email, password) => {
-    const res = await authApi.login(email, password);
-    if (res.token) localStorage.setItem("rentify_auth_token", res.token);
-    const user = res.user;
-    setCurrentUser(user);
-    setNeedsProfileSetup(!user.isProfileComplete);
-    setRegisteredUsers((prev) => {
-      const exists = prev.some((u) => u.id === user.id);
-      return exists ? prev.map((u) => (u.id === user.id ? user : u)) : [user, ...prev];
-    });
-    return user;
-  };
-
-  // Complete Onboarding Profile
+  // ── Complete Onboarding Profile ──────────────────────────────────────────────
   const completeFullProfile = async (profileData) => {
     if (!currentUser) return;
     try {
@@ -186,102 +72,42 @@ export const AuthProvider = ({ children }) => {
       const updated = res.user || {
         ...currentUser,
         ...profileData,
-        isVerified: profileData.isEmailVerified || currentUser.isVerified,
         isProfileComplete: true,
       };
       setCurrentUser(updated);
-      setRegisteredUsers((prev) =>
-        prev.map((u) => (u.id === currentUser.id ? updated : u))
-      );
       setNeedsProfileSetup(false);
     } catch (err) {
-      console.error("Complete profile API error:", err);
-      const updated = {
-        ...currentUser,
-        ...profileData,
-        isVerified: profileData.isEmailVerified || currentUser.isVerified,
-        isProfileComplete: true,
-      };
+      console.error("Complete profile error:", err);
+      const updated = { ...currentUser, ...profileData, isProfileComplete: true };
       setCurrentUser(updated);
       setNeedsProfileSetup(false);
     }
   };
 
-  // Quick Switch for Demo/Multi-party Testing
-  const switchUser = (userId) => {
-    const user = registeredUsers.find((u) => u.id === userId);
-    if (user) {
-      setCurrentUser(user);
-      setNeedsProfileSetup(!user.isProfileComplete);
-      registerUserSocket(user.id);
-    }
+  // ── Update Profile (local) ───────────────────────────────────────────────────
+  const updateProfile = (updates) => {
+    if (!currentUser) return;
+    setCurrentUser((prev) => ({ ...prev, ...updates }));
   };
 
-  // Logout
+  // ── Logout ───────────────────────────────────────────────────────────────────
   const logout = () => {
     setCurrentUser(null);
     setNeedsProfileSetup(false);
-    localStorage.removeItem("rentify_auth_token");
-    sessionStorage.removeItem("rentify_session_user");
-  };
-
-  const updateProfile = (updates) => {
-    if (!currentUser) return;
-    const updated = { ...currentUser, ...updates };
-    setCurrentUser(updated);
-    setRegisteredUsers((prev) =>
-      prev.map((u) => (u.id === currentUser.id ? updated : u))
-    );
-  };
-
-  const verifyCollegeEmail = async (collegeEmail) => {
-    if (!collegeEmail.includes(".edu") && !collegeEmail.includes(".ac.in")) {
-      return { success: false, message: "Please enter an official .edu or .ac.in college email." };
-    }
-    try {
-      const res = await authApi.verifyCollegeEmail(currentUser.id, collegeEmail);
-      if (res.user) {
-        setCurrentUser(res.user);
-        setRegisteredUsers((prev) =>
-          prev.map((u) => (u.id === currentUser.id ? res.user : u))
-        );
-      }
-      return { success: true, message: res.message || "College email verified!" };
-    } catch (err) {
-      const updated = {
-        ...currentUser,
-        email: collegeEmail,
-        isVerified: true,
-        isEmailVerified: true,
-      };
-      setCurrentUser(updated);
-      return { success: true, message: "College email verified! 'Verified Student' badge activated." };
-    }
+    localStorage.removeItem("unimandi_auth_token");
+    sessionStorage.removeItem("unimandi_session_user");
   };
 
   return (
     <AuthContext.Provider
       value={{
         currentUser,
-        registeredUsers,
-        availableUsers: registeredUsers,
         needsProfileSetup,
         setNeedsProfileSetup,
-        // Credential-based
-        registerUser,
-        loginWithCredentials,
-        // Legacy / social
         loginWithGoogle,
-        loginWithPhone,
-        loginWithCollegeEmail,
-        switchUser,
         logout,
         updateProfile,
         completeFullProfile,
-        verifyCollegeEmail,
-        // Forgot / reset password helpers (forward to API directly)
-        forgotPassword: (email) => authApi.forgotPassword(email),
-        resetPassword: (email, token, newPassword) => authApi.resetPassword(email, token, newPassword),
       }}
     >
       {children}

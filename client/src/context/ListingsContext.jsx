@@ -1,5 +1,5 @@
 import React, { createContext, useContext, useState, useEffect, useMemo } from "react";
-import { initialListings, CATEGORY_TREE } from "../data/seedListings";
+import { CATEGORY_TREE } from "../data/seedListings";
 import { useAuth } from "./AuthContext";
 import { listingsApi } from "../services/api";
 import { getSocket } from "../services/socket";
@@ -21,18 +21,18 @@ export const ListingsProvider = ({ children }) => {
 
   const [listings, setListings] = useState(() => {
     try {
-      const saved = localStorage.getItem("rentify_listings_v4");
-      return saved ? JSON.parse(saved) : initialListings;
+      const saved = localStorage.getItem("unimandi_listings_v5");
+      return saved ? JSON.parse(saved) : [];
     } catch (e) {
-      return initialListings;
+      return [];
     }
   });
 
   // Wishlist / Favorites State
   const [wishlist, setWishlist] = useState(() => {
     try {
-      const saved = localStorage.getItem("rentify_wishlist");
-      return saved ? JSON.parse(saved) : ["item_101", "item_103"];
+      const saved = localStorage.getItem("unimandi_wishlist");
+      return saved ? JSON.parse(saved) : [];
     } catch (e) {
       return [];
     }
@@ -97,14 +97,14 @@ export const ListingsProvider = ({ children }) => {
 
   useEffect(() => {
     try {
-      localStorage.setItem("rentify_listings_v4", JSON.stringify(listings));
-    } catch (e) {}
+      localStorage.setItem("unimandi_listings_v5", JSON.stringify(listings));
+    } catch (e) { }
   }, [listings]);
 
   useEffect(() => {
     try {
-      localStorage.setItem("rentify_wishlist", JSON.stringify(wishlist));
-    } catch (e) {}
+      localStorage.setItem("unimandi_wishlist", JSON.stringify(wishlist));
+    } catch (e) { }
   }, [wishlist]);
 
   const toggleWishlist = (listingId) => {

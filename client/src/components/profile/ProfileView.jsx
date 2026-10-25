@@ -15,10 +15,14 @@ import {
   LogOut,
   Home,
   Check,
-  Navigation
+  Navigation,
+  CreditCard,
+  QrCode,
 } from "lucide-react";
 import { useAuth } from "../../context/AuthContext";
+import { useStore } from "../../context/StoreContext";
 import { VerifiedBadge } from "../common/Badge";
+import { PickupPassModal } from "../store/PickupPassModal";
 import { BRANCHES, YEARS, RESIDENCE_TYPES, INDIAN_STATES } from "../../data/seedListings";
 
 const SEMESTERS = [
@@ -36,6 +40,7 @@ const PREFERRED_MEETUPS = [
 
 export const ProfileView = ({ onNavigateMyListings }) => {
   const { currentUser, updateProfile, verifyCollegeEmail, logout } = useAuth();
+  const { studentOrders, activePickupPass, setActivePickupPass } = useStore();
 
   const [isEditing, setIsEditing] = useState(false);
   const [name, setName] = useState(currentUser.name);
@@ -44,6 +49,7 @@ export const ProfileView = ({ onNavigateMyListings }) => {
   const [branch, setBranch] = useState(currentUser.branch);
   const [year, setYear] = useState(currentUser.year);
   const [semester, setSemester] = useState(currentUser.semester || "4th Semester");
+  const [selectedOrder, setSelectedOrder] = useState(null);
   
   // Real-world address states
   const [addressType, setAddressType] = useState(currentUser.addressType || RESIDENCE_TYPES[0]);
@@ -496,6 +502,59 @@ export const ProfileView = ({ onNavigateMyListings }) => {
 
       </div>
 
+      {/* Profile Purchases & QR Passes Section */}
+      <div className="bg-white rounded-3xl p-6 border border-slate-200/90 shadow-card">
+        <div className="flex items-center justify-between mb-4">
+          <h3 className="font-display font-bold text-base text-[#121417] flex items-center gap-2">
+            <CreditCard className="w-4 h-4 text-[#FF5A1F]" />
+            <span>My Purchases & QR Passes</span>
+          </h3>
+          <span className="inline-flex items-center gap-1.5 text-[10px] font-bold text-emerald-700 bg-emerald-50 px-2.5 py-1 rounded-full border border-emerald-500/20">
+            <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600" />
+            {studentOrders?.length || 0} paid
+          </span>
+        </div>
+
+        {studentOrders && studentOrders.length > 0 ? (
+          <div className="space-y-3">
+            {studentOrders.slice(0, 4).map((order) => (
+              <div key={order.id} className="p-4 rounded-2xl border border-slate-200 bg-slate-50/60">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div>
+                    <div className="flex items-center gap-2">
+                      <span className="text-[10px] font-bold uppercase tracking-wider text-slate-400">Order</span>
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-100 text-emerald-700 border border-emerald-200">
+                        {order.status || "Ready for Pickup"}
+                      </span>
+                    </div>
+                    <p className="font-bold text-[#121417] mt-1">
+                      {order.items?.map((item) => item.name).join(", ") || "Campus item"}
+                    </p>
+                    <p className="text-[11px] text-slate-500 mt-1">
+                      {order.placedAt ? new Date(order.placedAt).toLocaleDateString() : "Today"} • ₹{Number(order.totalAmount || 0).toLocaleString("en-IN")}
+                    </p>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    <button
+                      onClick={() => setSelectedOrder(order)}
+                      className="inline-flex items-center gap-1.5 px-3 py-2 rounded-xl bg-[#121417] text-white text-[11px] font-bold hover:bg-black transition-colors"
+                    >
+                      <QrCode className="w-3.5 h-3.5" />
+                      View QR Pass
+                    </button>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        ) : (
+          <div className="p-5 rounded-2xl border border-dashed border-slate-300 bg-slate-50 text-xs text-slate-500 text-center">
+            No successful purchases yet. Once you pay for an item, your QR pickup pass will appear here.
+          </div>
+        )}
+      </div>
+
       {/* Shortcut to My Listings */}
       <div className="p-6 rounded-3xl bg-cream-200/60 border border-cream-300 flex items-center justify-between">
         <div>
@@ -515,6 +574,16 @@ export const ProfileView = ({ onNavigateMyListings }) => {
         </button>
       </div>
 
+      {(selectedOrder || activePickupPass) && (
+        <PickupPassModal
+          isOpen={Boolean(selectedOrder || activePickupPass)}
+          onClose={() => {
+            setSelectedOrder(null);
+            setActivePickupPass(null);
+          }}
+          order={selectedOrder || activePickupPass}
+        />
+      )}
     </div>
   );
 };

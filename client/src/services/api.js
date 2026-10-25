@@ -1,7 +1,7 @@
 const API_BASE = import.meta.env.VITE_API_BASE_URL || "/api";
 
 const request = async (url, options = {}) => {
-  const token = localStorage.getItem("rentify_auth_token");
+  const token = localStorage.getItem("unimandi_auth_token");
   const headers = {
     "Content-Type": "application/json",
     ...(token ? { Authorization: `Bearer ${token}` } : {}),
@@ -36,28 +36,12 @@ const request = async (url, options = {}) => {
 
 // 1. Auth API
 export const authApi = {
-  // ── Credential-based ──────────────────────────────────────────────────────
-  register: (userData) =>
-    request("/auth/register", { method: "POST", body: JSON.stringify(userData) }),
-  login: (email, password) =>
-    request("/auth/login", { method: "POST", body: JSON.stringify({ email, password }) }),
-  forgotPassword: (email) =>
-    request("/auth/forgot-password", { method: "POST", body: JSON.stringify({ email }) }),
-  resetPassword: (email, resetToken, newPassword) =>
-    request("/auth/reset-password", { method: "POST", body: JSON.stringify({ email, resetToken, newPassword }) }),
+  // ── Google OAuth ──────────────────────────────────────────────────────────
+  googleVerify: (credential) =>
+    request("/auth/google-verify", { method: "POST", body: JSON.stringify({ credential }) }),
   getMe: () => request("/auth/me"),
-
-  // ── Legacy / Social ───────────────────────────────────────────────────────
-  googleLogin: (profileData) =>
-    request("/auth/google", { method: "POST", body: JSON.stringify(profileData) }),
-  sendPhoneOtp: (phone) =>
-    request("/auth/phone/send-otp", { method: "POST", body: JSON.stringify({ phone }) }),
-  verifyPhoneOtp: (phone, otp) =>
-    request("/auth/phone/verify-otp", { method: "POST", body: JSON.stringify({ phone, otp }) }),
   completeProfile: (profileData) =>
     request("/auth/complete-profile", { method: "POST", body: JSON.stringify(profileData) }),
-  verifyCollegeEmail: (userId, collegeEmail) =>
-    request("/auth/email/verify", { method: "POST", body: JSON.stringify({ userId, collegeEmail }) }),
   getAllUsers: () => request("/auth/users"),
 };
 

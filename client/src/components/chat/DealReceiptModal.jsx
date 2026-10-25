@@ -12,16 +12,22 @@ import {
   Copy,
   Check,
   Building2,
-  FileCheck
+  FileCheck,
+  CreditCard,
+  Loader2
 } from "lucide-react";
+import { UpiQrPayment } from "../common/UpiQrPayment";
 
 const formatINR = (val) => {
   if (val === null || val === undefined || isNaN(Number(val))) return "0";
   return Number(val).toLocaleString("en-IN");
 };
 
-export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating }) => {
+export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating, currentUser }) => {
   const [copied, setCopied] = React.useState(false);
+  const [razorpayPaymentId, setRazorpayPaymentId] = React.useState(null);
+  const [isPaymentLoading, setIsPaymentLoading] = React.useState(false);
+  const [paymentMode, setPaymentMode] = React.useState(null); // null | 'razorpay' | 'upi_qr'
 
   if (!isOpen || !chat) return null;
 
@@ -51,7 +57,7 @@ export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating }) => {
 
   const handleCopyPass = () => {
     navigator.clipboard.writeText(
-      `UniMandi Verified Deal Receipt\nRef: ${dealId}\nItem: ${chat.listing?.title}\nAgreed Price: ₹${finalPrice}\nSeller: ${chat.otherUser?.name}\nDate: ${completedTime}`
+      `UniMandi Verified Deal Receipt\nRef: ${dealId}\nItem: ${chat.listing?.title}\nAgreed Price: ₹${finalPrice}\nSeller: ${chat.otherUser?.name}\nDate: ${completedTime}${razorpayPaymentId ? `\nPayment ID: ${razorpayPaymentId}` : ""}`
     );
     setCopied(true);
     setTimeout(() => setCopied(false), 2500);
@@ -59,6 +65,54 @@ export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating }) => {
 
   const simulateQrScan = () => {
     setIsQrScanned(true);
+  };
+
+  const handleRazorpayPayment = () => {
+    if (!window.Razorpay) {
+      alert("Payment gateway not loaded. Please refresh and try again.");
+      return;
+    }
+    if (finalPrice <= 0) {
+      simulateQrScan();
+      return;
+    }
+
+    setIsPaymentLoading(true);
+    const options = {
+      key: import.meta.env.VITE_RAZORPAY_KEY_ID || "rzp_test_Tr27LhEzMnzdZm",
+      amount: Math.round(finalPrice * 100),
+      currency: "INR",
+      name: "UniMandi Marketplace",
+      description: chat.listing?.title || "Campus Deal Payment",
+      prefill: {
+        name: currentUser?.name || chat.buyerName || "Buyer",
+        email: currentUser?.email || "",
+        contact: currentUser?.phone || "",
+      },
+      notes: {
+        dealId,
+        listingId: chat.listingId,
+        sellerId: chat.sellerId,
+        buyerId: chat.buyerId,
+      },
+      theme: { color: "#10B981" },
+      handler: (response) => {
+        setRazorpayPaymentId(response.razorpay_payment_id);
+        setIsPaymentLoading(false);
+        setIsQrScanned(true);
+      },
+      modal: {
+        ondismiss: () => setIsPaymentLoading(false),
+      },
+    };
+
+    const rzp = new window.Razorpay(options);
+    rzp.on("payment.failed", (resp) => {
+      console.error("Payment failed:", resp.error);
+      alert(`Payment failed: ${resp.error.description}`);
+      setIsPaymentLoading(false);
+    });
+    rzp.open();
   };
 
   return (
@@ -122,6 +176,53 @@ export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating }) => {
                   Click to simulate QR scan
                 </div>
               </div>
+              {/* Payment Method Choose */}
+              {paymentMode === null && (
+                <div className="mt-5 w-full max-w-[260px] space-y-2">
+                  <p className="text-[10px] font-bold uppercase text-slate-400 text-center mb-3">Choose How to Pay ₹{finalPrice.toLocaleString("en-IN")}</p>
+                  <button
+                    onClick={handleRazorpayPayment}
+                    disabled={isPaymentLoading}
+                    className="w-full py-3 px-4 rounded-2xl bg-emerald-600 hover:bg-emerald-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all disabled:opacity-70"
+                  >
+                    {isPaymentLoading ? (
+                      <>
+                        <Loader2 className="w-4 h-4 animate-spin" />
+                        <span>Opening Razorpay...</span>
+                      </>
+                    ) : (
+                      <>
+                        <CreditCard className="w-4 h-4" />
+                        <span>💳 Pay via Razorpay (Cards / UPI)</span>
+                      </>
+                    )}
+                  </button>
+                  <button
+                    onClick={() => setPaymentMode("upi_qr")}
+                    className="w-full py-3 px-4 rounded-2xl bg-indigo-600 hover:bg-indigo-700 text-white font-bold text-xs flex items-center justify-center gap-2 shadow-md transition-all"
+                  >
+                    📱 Scan UPI QR (PhonePe / GPay)
+                  </button>
+                  <p className="text-[10px] text-slate-400 text-center mt-1">Both options are secure & instant</p>
+                </div>
+              )}
+
+              {/* UPI QR Mode */}
+              {paymentMode === "upi_qr" && (
+                <div className="mt-4 w-full animate-reveal-up">
+                  <UpiQrPayment
+                    amount={finalPrice}
+                    description={chat.listing?.title || "Campus Deal Payment"}
+                    accentColor="#10B981"
+                    onPaymentConfirmed={(upiDetails) => {
+                      setRazorpayPaymentId(upiDetails.paymentId);
+                      setIsQrScanned(true);
+                      setPaymentMode(null);
+                    }}
+                    onCancel={() => setPaymentMode(null)}
+                  />
+                </div>
+              )}
             </div>
           ) : (
             <div className="space-y-4 animate-reveal-up">
@@ -131,7 +232,9 @@ export const DealReceiptModal = ({ isOpen, onClose, chat, onOpenRating }) => {
                   <CheckCircle2 className="w-4 h-4 text-emerald-600 shrink-0" />
                   <div>
                     <p className="font-bold text-xs">Payment & Handover Verified</p>
-                    <p className="text-[10px] text-emerald-700">Digital receipt generated successfully</p>
+                    <p className="text-[10px] text-emerald-700">
+                      {razorpayPaymentId ? `Payment ID: ${razorpayPaymentId}` : "Digital receipt generated successfully"}
+                    </p>
                   </div>
                 </div>
                 <span className="font-mono text-[10px] font-extrabold bg-white px-2 py-0.5 rounded border border-emerald-300 text-emerald-800">
