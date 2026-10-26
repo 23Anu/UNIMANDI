@@ -44,7 +44,6 @@ export const AuthProvider = ({ children }) => {
   }, [currentUser]);
 
   // ── Google OAuth Login (Real) ────────────────────────────────────────────────
-  // credential = the Google ID token from @react-oauth/google
   const loginWithGoogle = async (credential) => {
     try {
       const res = await authApi.googleVerify(credential);
@@ -57,6 +56,23 @@ export const AuthProvider = ({ children }) => {
       return user;
     } catch (err) {
       console.error("Google login error:", err);
+      throw err;
+    }
+  };
+
+  // ── Store Operator Passcode Login ────────────────────────────────────────────
+  const loginAsStoreOperator = async (passcode) => {
+    try {
+      const res = await authApi.storeLogin(passcode);
+      if (res.token) {
+        localStorage.setItem("unimandi_auth_token", res.token);
+      }
+      const user = res.user;
+      setCurrentUser(user);
+      setNeedsProfileSetup(false);
+      return user;
+    } catch (err) {
+      console.error("Store login error:", err);
       throw err;
     }
   };
@@ -105,6 +121,7 @@ export const AuthProvider = ({ children }) => {
         needsProfileSetup,
         setNeedsProfileSetup,
         loginWithGoogle,
+        loginAsStoreOperator,
         logout,
         updateProfile,
         completeFullProfile,

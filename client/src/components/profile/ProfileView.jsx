@@ -43,28 +43,28 @@ export const ProfileView = ({ onNavigateMyListings }) => {
   const { studentOrders, activePickupPass, setActivePickupPass } = useStore();
 
   const [isEditing, setIsEditing] = useState(false);
-  const [name, setName] = useState(currentUser.name);
-  const [college, setCollege] = useState(currentUser.college || "National Institute of Technology");
-  const [rollNo, setRollNo] = useState(currentUser.rollNo || "2024CS104");
-  const [branch, setBranch] = useState(currentUser.branch);
-  const [year, setYear] = useState(currentUser.year);
-  const [semester, setSemester] = useState(currentUser.semester || "4th Semester");
+  const [name, setName] = useState(currentUser?.name || "");
+  const [college, setCollege] = useState(currentUser?.college || "");
+  const [rollNo, setRollNo] = useState(currentUser?.rollNo || "");
+  const [branch, setBranch] = useState(currentUser?.branch || "");
+  const [year, setYear] = useState(currentUser?.year || "");
+  const [semester, setSemester] = useState(currentUser?.semester || "");
   const [selectedOrder, setSelectedOrder] = useState(null);
-  
+
   // Real-world address states
-  const [addressType, setAddressType] = useState(currentUser.addressType || RESIDENCE_TYPES[0]);
-  const [roomNo, setRoomNo] = useState(currentUser.roomNo || "Room 212");
-  const [buildingName, setBuildingName] = useState(currentUser.buildingName || (currentUser.hostel || "Hostel Block 4 (Senior Boys)"));
-  const [streetArea, setStreetArea] = useState(currentUser.streetArea || "South Campus Lane, Near Central Mess");
-  const [landmark, setLandmark] = useState(currentUser.landmark || "Opposite Volleyball Ground");
-  const [city, setCity] = useState(currentUser.city || "Pune");
-  const [state, setState] = useState(currentUser.state || "Maharashtra");
-  const [pincode, setPincode] = useState(currentUser.pincode || "411038");
-  const [pickupLocation, setPickupLocation] = useState(currentUser.pickupLocation || PREFERRED_MEETUPS[0]);
-  const [phone, setPhone] = useState(currentUser.phone || "");
+  const [addressType, setAddressType] = useState(currentUser?.addressType || RESIDENCE_TYPES[0]);
+  const [roomNo, setRoomNo] = useState(currentUser?.roomNo || "");
+  const [buildingName, setBuildingName] = useState(currentUser?.buildingName || currentUser?.hostel || "");
+  const [streetArea, setStreetArea] = useState(currentUser?.streetArea || "");
+  const [landmark, setLandmark] = useState(currentUser?.landmark || "");
+  const [city, setCity] = useState(currentUser?.city || "");
+  const [state, setState] = useState(currentUser?.state || "");
+  const [pincode, setPincode] = useState(currentUser?.pincode || "");
+  const [pickupLocation, setPickupLocation] = useState(currentUser?.pickupLocation || PREFERRED_MEETUPS[0]);
+  const [phone, setPhone] = useState(currentUser?.phone || "");
 
   // Email verification input state
-  const [collegeEmailInput, setCollegeEmailInput] = useState(currentUser.email || "");
+  const [collegeEmailInput, setCollegeEmailInput] = useState(currentUser?.email || "");
   const [verificationFeedback, setVerificationFeedback] = useState(null);
 
   const getFormattedAddress = () => {
@@ -117,7 +117,7 @@ export const ProfileView = ({ onNavigateMyListings }) => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 text-left animate-reveal-up pb-12">
-      
+
       {/* Profile Header Card */}
       <div className="bg-white rounded-3xl p-6 sm:p-8 border border-slate-200/90 shadow-card">
         <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-6">
@@ -404,7 +404,7 @@ export const ProfileView = ({ onNavigateMyListings }) => {
 
       {/* Trust & Dual Verification Section */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-        
+
         {/* College Email & Phone Verification */}
         <div className="bg-cream-50 rounded-3xl p-6 border border-cream-300 shadow-card flex flex-col justify-between">
           <div>
@@ -414,7 +414,7 @@ export const ProfileView = ({ onNavigateMyListings }) => {
                 Identity & Contact Verification
               </h3>
             </div>
-            
+
             <p className="text-xs text-slate-600 mb-4 leading-relaxed">
               Verified campus profiles get 3x higher inquiries and trusted deal confirmations.
             </p>

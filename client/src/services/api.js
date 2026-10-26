@@ -36,13 +36,14 @@ const request = async (url, options = {}) => {
 
 // 1. Auth API
 export const authApi = {
-  // ── Google OAuth ──────────────────────────────────────────────────────────
   googleVerify: (credential) =>
     request("/auth/google-verify", { method: "POST", body: JSON.stringify({ credential }) }),
   getMe: () => request("/auth/me"),
   completeProfile: (profileData) =>
     request("/auth/complete-profile", { method: "POST", body: JSON.stringify(profileData) }),
   getAllUsers: () => request("/auth/users"),
+  storeLogin: (passcode) =>
+    request("/auth/store-login", { method: "POST", body: JSON.stringify({ passcode }) }),
 };
 
 // 2. Listings API

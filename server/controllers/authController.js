@@ -4,6 +4,7 @@ import { users, saveDB } from "../data/store.js";
 
 const JWT_SECRET = process.env.JWT_SECRET || "unimandi_super_secret_jwt_key_2026";
 const GOOGLE_CLIENT_ID = process.env.GOOGLE_CLIENT_ID || "";
+const STORE_PASS = process.env.STORE_PASS || "SACSTORE2026";
 
 const googleClient = new OAuth2Client(GOOGLE_CLIENT_ID);
 
@@ -137,4 +138,45 @@ export const completeProfile = (req, res) => {
 export const getAllUsers = (req, res) => {
   const safeUsers = users.map(({ password, resetToken, resetTokenExpiry, ...u }) => u);
   res.json({ users: safeUsers });
+};
+
+// ─── STORE OPERATOR LOGIN (Passcode-based) ────────────────────────────────────
+export const storeLogin = (req, res) => {
+  try {
+    const { passcode } = req.body;
+    if (!passcode || passcode.trim() !== STORE_PASS) {
+      return res.status(401).json({ error: "Invalid store passcode. Access denied." });
+    }
+
+    // Find or create the merchant user
+    let merchant = users.find((u) => u.role === "merchant" || u.id === "user_kampus_store");
+    if (!merchant) {
+      merchant = {
+        id: "user_kampus_store",
+        name: "SAC Store Operator",
+        email: "store@unimandi.campus",
+        phone: "",
+        role: "merchant",
+        avatar: "https://ui-avatars.com/api/?name=SAC+Store&background=FF5A1F&color=fff&bold=true",
+        college: "UniMandi Campus",
+        branch: "SAC Administration",
+        year: "Staff",
+        isVerified: true,
+        isProfileComplete: true,
+        trustScore: 5.0,
+        dealsCount: 0,
+        createdAt: new Date().toISOString(),
+      };
+      users.unshift(merchant);
+      saveDB();
+    }
+
+    const token = generateToken(merchant);
+    const { password: _pw, ...safeUser } = merchant;
+    console.log(`🏪 Store operator signed in: ${merchant.name}`);
+    res.json({ success: true, user: safeUser, token });
+  } catch (err) {
+    console.error("Store login error:", err);
+    res.status(500).json({ error: "Store login failed." });
+  }
 };
